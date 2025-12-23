@@ -1,14 +1,16 @@
-import { DisplayMode, Engine } from "excalibur";
+import { Color, DisplayMode, Engine } from "excalibur";
 import { loader } from "./resources";
-import { MyLevel } from "./level";
+import { BaseLevel } from "./Scenes/level";
 
 const game = new Engine({
   width: 640,
   height: 360,
-  displayMode: DisplayMode.FitScreenAndFill,
+  displayMode: DisplayMode.FitContainerAndFill,
+  canvasElementId: 'game',
   pixelArt: true,
+  backgroundColor: Color.Black,
   scenes: {
-    start: MyLevel
+    start: BaseLevel
   },
 });
 

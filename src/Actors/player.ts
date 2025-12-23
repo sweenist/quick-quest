@@ -1,4 +1,4 @@
-import { Actor, vec } from "excalibur";
+import { Actor, Color, vec } from "excalibur";
 
 export class Player extends Actor {
   constructor() {
@@ -7,6 +7,7 @@ export class Player extends Actor {
       pos: vec(150, 150),
       width: 16,
       height: 16,
+      color: Color.Yellow
     });
 
   }
