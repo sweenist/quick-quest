@@ -1,10 +1,13 @@
-import { Actor, Color, vec } from "excalibur";
+import { Actor, Color, Engine, Keys, vec, Vector } from "excalibur";
 
 export class Player extends Actor {
+  isMoving: boolean = false;
+  destination?: Vector
+
   constructor() {
     super({
       name: 'Player',
-      pos: vec(150, 150),
+      pos: vec(112, 160),
       width: 16,
       height: 16,
       color: Color.Yellow
@@ -12,7 +15,13 @@ export class Player extends Actor {
 
   }
 
-  override onInitialize() {
+  override onInitialize(engine: Engine): void {
 
+  }
+
+  update(engine: Engine, elapsed: number): void {
+    if (engine.input.keyboard.isHeld(Keys.ArrowUp)) {
+      this.pos.y -= 1;
+    }
   }
 }

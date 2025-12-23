@@ -10,4 +10,9 @@
   canvas {
     image-rendering: pixelated;
   }
+
+  #container {
+    aspect-ratio: calc(16/9);
+    
+  }
 }

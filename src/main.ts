@@ -1,6 +1,6 @@
 import { Color, DisplayMode, Engine } from "excalibur";
 import { loader } from "./resources";
-import { BaseLevel } from "./Scenes/level";
+import { ThroneRoom } from "./Scenes/throneRoom";
 
 const game = new Engine({
   width: 640,
@@ -10,9 +10,11 @@ const game = new Engine({
   pixelArt: true,
   backgroundColor: Color.Black,
   scenes: {
-    start: BaseLevel
+    start: ThroneRoom
   },
 });
+
+game.toggleDebug();
 
 game.start(loader).then(() => {
   game.goToScene('start');
