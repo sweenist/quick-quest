@@ -52,11 +52,22 @@ export class Player extends Actor {
 
     const newDestination = vec(nextX, nextY);
 
-    const tileMap = this.scene?.entities.find((c) => c instanceof TileMap);
-    const targetTile = tileMap?.getTileByPoint(newDestination);
 
-    if (targetTile && targetTile.solid) return;
+    if (!this.canTravel(newDestination)) return;
 
     this.destination = newDestination;
+  }
+
+  canTravel(target: Vector): boolean {
+    const tileMap = this.scene?.entities.find((c) => c instanceof TileMap);
+    const targetTile = tileMap?.getTileByPoint(target);
+
+    if (targetTile && targetTile.solid)
+      return false;
+
+    if (this.scene?.actors.some((actor) => actor.pos.equals(target)))
+      return false;
+
+    return true;
   }
 }
