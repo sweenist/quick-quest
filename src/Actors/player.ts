@@ -11,7 +11,8 @@ export class Player extends Actor {
       pos: vec(112, 160),
       width: 16,
       height: 16,
-      color: Color.Yellow
+      color: Color.Yellow,
+      anchor: Vector.Zero
     });
     this.destination = this.pos.clone();
   }
@@ -33,7 +34,7 @@ export class Player extends Actor {
     let nextY = this.destination.y;
 
     if (input.keyboard.isHeld(Keys.ArrowUp)) {
-      console.info("Go up")
+      console.info(this)
       nextY -= MOVE_DELTA;
     }
     else if (input.keyboard.isHeld(Keys.ArrowDown)) {

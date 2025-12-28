@@ -1,24 +1,57 @@
-import { Actor, Color, vec } from "excalibur";
+import { Actor, Circle, Color, Rectangle, TileMap, Vector } from "excalibur";
 import { BaseLevel } from "./baselevel";
 import { config } from "../Configuration/throne-config";
 
 export class ThroneRoom extends BaseLevel {
+  tileMap!: TileMap;
+
   constructor() {
     super();
     this.buildRoom();
+    this.buildNpcs();
   }
 
   buildRoom() {
-    for (const wall of config.walls) {
-      const w = new Actor({
-        pos: vec(wall.x * 16, wall.y * 16),
-        color: Color.DarkGray,
-        height: 16,
+    this.tileMap = new TileMap({
+      columns: config.room[0].length,
+      rows: config.room.length,
+      tileHeight: 16,
+      tileWidth: 16,
+      renderFromTopOfGraphic: true
+    });
+
+    this.tileMap.tiles.forEach((tile) => {
+      const tileVal = config.room[tile.y][tile.x];
+      if (tileVal === 1) {
+        tile.solid = true;
+        tile.addGraphic(new Rectangle({
+          width: tile.width,
+          height: tile.height,
+          color: Color.DarkGray,
+        }));
+      }
+      else if (tileVal === 2) {
+        tile.addGraphic(new Circle({
+          radius: 8,
+          strokeColor: Color.Orange,
+          color: Color.Blue
+        }));
+      }
+    });
+    this.add(this.tileMap)
+  }
+
+  buildNpcs() {
+    config.npcs.forEach((npc) => {
+      const actor = new Actor({
+        x: npc.x,
+        y: npc.y,
         width: 16,
-        z: 1,
-        name: 'wall'
+        height: 16,
+        color: npc.color,
+        anchor: Vector.Zero,
       });
-      this.add(w);
-    }
+      this.add(actor);
+    })
   }
 }
