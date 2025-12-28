@@ -52,7 +52,6 @@ export class Player extends Actor {
 
     const newDestination = vec(nextX, nextY);
 
-
     if (!this.canTravel(newDestination)) return;
 
     this.destination = newDestination;

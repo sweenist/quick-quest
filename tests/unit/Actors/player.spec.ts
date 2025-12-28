@@ -17,13 +17,12 @@ function engineWithKeyHeld(keyHeld: Keys) {
 
 class FakeTileMap extends TileMap {
   constructor(private solid: boolean) {
-    // call super with minimal config so internals initialize
     super({ rows: 1, columns: 1, tileWidth: 16, tileHeight: 16 } as any);
   }
 
   // Excalibur's API uses getTileByPoint in Player.canTravel; return a tile-like object when solid
   getTileByPoint(_: Vector) {
-    return this.solid ? { solid: true } : undefined;
+    return this.solid ? { solid: true } : null;
   }
 }
 
@@ -67,6 +66,21 @@ describe('player', () => {
     player.tryMove(engine);
 
     expect(player.destination.x).toBe(player.pos.x + MOVE_DELTA);
+    expect(player.destination.y).toBe(player.pos.y);
+  });
+
+  it('should block movement when another actor exists at destination', () => {
+    const player = new Player();
+    player.destination = player.pos.clone();
+    const blockingActor = new Player(); // any actor will do
+    blockingActor.pos = new Vector(player.pos.x + MOVE_DELTA, player.pos.y);
+    player.scene = { entities: [], actors: [blockingActor] } as any;
+
+    const engine = engineWithKeyHeld(Keys.ArrowRight);
+
+    player.tryMove(engine);
+
+    expect(player.destination.x).toBe(player.pos.x);
     expect(player.destination.y).toBe(player.pos.y);
   });
 });
