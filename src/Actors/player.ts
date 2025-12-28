@@ -1,4 +1,4 @@
-import { Actor, Color, Engine, Keys, vec, Vector } from "excalibur";
+import { Actor, Color, Engine, Keys, TileMap, vec, Vector } from "excalibur";
 import { moveToTarget } from "../Utils/moveUtils";
 
 export class Player extends Actor {
@@ -51,6 +51,11 @@ export class Player extends Actor {
     }
 
     const newDestination = vec(nextX, nextY);
+
+    const tileMap = this.scene?.entities.find((c) => c instanceof TileMap);
+    const targetTile = tileMap?.getTileByPoint(newDestination);
+
+    if (targetTile && targetTile.solid) return;
 
     this.destination = newDestination;
   }
