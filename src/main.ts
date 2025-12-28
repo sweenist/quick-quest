@@ -14,8 +14,6 @@ const game = new Engine({
   },
 });
 
-game.toggleDebug();
-
 game.start(loader).then(() => {
   game.goToScene('start');
 });

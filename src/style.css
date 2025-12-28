@@ -1,18 +1,23 @@
-@media (prefers-color-scheme: dark) {
   body {
     background-color: black;
     display: flex;
     height: 100vh;
     justify-content: center;
-    align-items: normal;
+    align-items: baseline;
+    padding: 0;
+    margin: 0;
+    overflow: hidden;
+  }
+
+  #container {
+    aspect-ratio: 16/9;
+    max-height: 95dvh;
+    max-width: 1280px;
+    align-items: center;
   }
 
   canvas {
     image-rendering: pixelated;
+    display: block;
+    object-fit: contain;
   }
-
-  #container {
-    aspect-ratio: calc(16/9);
-    
-  }
-}
