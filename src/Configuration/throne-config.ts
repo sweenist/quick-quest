@@ -16,7 +16,7 @@ export const config = {
     [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
   ],
   npcs: [
-    { x: 112, y: 48, color: Color.Red },
-    { x: 80, y: 48, color: Color.Rose }
+    { x: 112, y: 48, color: Color.Red, name: 'King' },
+    { x: 80, y: 48, color: Color.Rose, name: 'Queen' }
   ]
 }

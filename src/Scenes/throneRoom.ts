@@ -50,6 +50,7 @@ export class ThroneRoom extends BaseLevel {
         height: 16,
         color: npc.color,
         anchor: Vector.Zero,
+        name: npc.name
       });
       this.add(actor);
     })

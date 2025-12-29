@@ -1,9 +1,31 @@
-import { Actor, Color, Engine, Keys, TileMap, vec, Vector } from "excalibur";
+import { Actor, ActorEvents, Color, Engine, EventEmitter, GameEvent, Keys, TileMap, vec, Vector } from "excalibur";
 import { moveToTarget } from "../Utils/moveUtils";
 
+type PlayerEvents = ActorEvents & {
+  startInteraction: InteractionStartEvent
+  completeInteraction: InteractionCompleteEvent
+}
+
+export const PlayerEvents = {
+  StartInteraction: 'startInteraction',
+  CompleteInteraction: 'completeInteraction'
+} as const
+
+export class InteractionStartEvent extends GameEvent<Player> {
+  constructor(self: Player) {
+    super();
+  }
+}
+export class InteractionCompleteEvent extends GameEvent<Player> {
+  constructor(self: Player) {
+    super();
+  }
+}
+
 export class Player extends Actor {
-  isMoving: boolean = false;
-  destination: Vector
+  isLocked: boolean = false;
+  destination: Vector;
+  public events = new EventEmitter<PlayerEvents & ActorEvents>()
 
   constructor() {
     super({
@@ -15,14 +37,21 @@ export class Player extends Actor {
       anchor: Vector.Zero
     });
     this.destination = this.pos.clone();
+
   }
 
   override onInitialize(engine: Engine): void {
-
+    this.events.on('startInteraction', (ev) => {
+      console.info('actioned', ev);
+      this.act();
+    });
   }
 
   update(engine: Engine, elapsed: number): void {
-
+    const { input } = engine;
+    if (input.keyboard.wasPressed(Keys.Space) || input.keyboard.wasPressed(Keys.Enter)) {
+      this.events.emit('startInteraction', new InteractionStartEvent(this))
+    }
     const distance = moveToTarget(this.pos, this.destination, 1);
     if (distance < 1) this.tryMove(engine);
   }
@@ -34,16 +63,12 @@ export class Player extends Actor {
     let nextY = this.destination.y;
 
     if (input.keyboard.isHeld(Keys.ArrowUp)) {
-      console.info(this)
       nextY -= MOVE_DELTA;
     }
     else if (input.keyboard.isHeld(Keys.ArrowDown)) {
-      console.info("Go down")
       nextY += MOVE_DELTA;
     }
     else if (input.keyboard.isHeld(Keys.ArrowLeft)) {
-      console.info("Go left")
-
       nextX -= MOVE_DELTA;
     }
     else if (input.keyboard.isHeld(Keys.ArrowRight)) {
@@ -68,5 +93,17 @@ export class Player extends Actor {
       return false;
 
     return true;
+  }
+
+  act() {
+    const north = Vector.Up;
+    north.y = north.y * 16;
+    const target = this.pos.clone().add(north);
+    console.info(north, target, Vector.Up);
+    const entity = this.scene?.actors.find((actor) => actor.pos.equals(target));
+    if (entity) {
+      console.info(entity);
+    }
+    this.scene?.actors.forEach((actor) => console.info(actor.pos))
   }
 }
