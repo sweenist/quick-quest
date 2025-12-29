@@ -1,5 +1,7 @@
 import { Actor, ActorEvents, Color, Engine, EventEmitter, GameEvent, Keys, TileMap, vec, Vector } from "excalibur";
 import { moveToTarget } from "../Utils/moveUtils";
+import { Direction } from "../types";
+import { Directions, FacingVectors } from "../constants";
 
 type PlayerEvents = ActorEvents & {
   startInteraction: InteractionStartEvent
@@ -25,6 +27,7 @@ export class InteractionCompleteEvent extends GameEvent<Player> {
 export class Player extends Actor {
   isLocked: boolean = false;
   destination: Vector;
+  facing: Direction = Directions.Down;
   public events = new EventEmitter<PlayerEvents & ActorEvents>()
 
   constructor() {
@@ -41,7 +44,7 @@ export class Player extends Actor {
   }
 
   override onInitialize(engine: Engine): void {
-    this.events.on('startInteraction', (ev) => {
+    this.events.on(PlayerEvents.StartInteraction, (ev) => {
       console.info('actioned', ev);
       this.act();
     });
@@ -64,15 +67,19 @@ export class Player extends Actor {
 
     if (input.keyboard.isHeld(Keys.ArrowUp)) {
       nextY -= MOVE_DELTA;
+      this.facing = Directions.Up;
     }
     else if (input.keyboard.isHeld(Keys.ArrowDown)) {
       nextY += MOVE_DELTA;
+      this.facing = Directions.Down;
     }
     else if (input.keyboard.isHeld(Keys.ArrowLeft)) {
       nextX -= MOVE_DELTA;
+      this.facing = Directions.Left;
     }
     else if (input.keyboard.isHeld(Keys.ArrowRight)) {
       nextX += MOVE_DELTA;
+      this.facing = Directions.Right;
     }
 
     const newDestination = vec(nextX, nextY);
@@ -96,14 +103,16 @@ export class Player extends Actor {
   }
 
   act() {
-    const north = Vector.Up;
-    north.y = north.y * 16;
-    const target = this.pos.clone().add(north);
-    console.info(north, target, Vector.Up);
+    let ray = FacingVectors[this.facing];
+    ray = ray.scale(16);
+    const target = this.pos.clone().add(ray);
     const entity = this.scene?.actors.find((actor) => actor.pos.equals(target));
+    const trigger = this.scene?.triggers.find((trigger) => trigger.pos.equals(target));
     if (entity) {
-      console.info(entity);
+      console.info(`Talking to ${entity.name}`);
     }
-    this.scene?.actors.forEach((actor) => console.info(actor.pos))
+    if (trigger) {
+      console.info("About to be triggered", trigger)
+    }
   }
 }
