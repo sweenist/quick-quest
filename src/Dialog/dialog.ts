@@ -5,9 +5,11 @@ import { conley, DialogEvents } from "../Events/eventTypes";
 
 export class Dialog extends Actor {
   frame: NineSlice;
+  dialogDiv: HTMLDivElement;
 
   constructor() {
     super();
+
     this.pos = vec(200, 100)
     this.frame = new NineSlice({
       height: 120,
@@ -27,6 +29,8 @@ export class Dialog extends Actor {
         verticalStretch: NineSliceStretch.TileFit
       }
     });
+
+    this.dialogDiv = document.querySelector<HTMLDivElement>('#dialog-frame')!;
   }
 
   onInitialize(engine: Engine): void {
@@ -47,5 +51,7 @@ export class Dialog extends Actor {
     const offsetX = this.frame.width / 2
     this.pos.x -= offsetX
     console.warn(actor, this.pos, this.frame, offsetX, canvas.width)
+
+    this.dialogDiv.setAttribute('data-visible', 'true')
   }
 }
