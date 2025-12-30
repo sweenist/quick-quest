@@ -1,17 +1,16 @@
-import { Actor, Color, Engine, EventEmitter, Keys, TileMap, vec, Vector } from "excalibur";
+import { Actor, Color, Engine, Keys, TileMap, vec, Vector } from "excalibur";
 import { moveToTarget } from "../Utils/moveUtils";
 import { Direction } from "../types";
 import { Directions, FacingVectors } from "../constants";
-import { DialogEvents, PlayerEvents, QuickQuestEvents } from "../Events/eventTypes";
+import { conley, DialogEvents, PlayerEvents } from "../Events/eventTypes";
 import { InteractionStartEvent, ShowDialogEvent } from "../Events/events";
 
 export class Player extends Actor {
   isLocked: boolean = false;
   destination: Vector;
   facing: Direction = Directions.Down;
-  public events: EventEmitter<QuickQuestEvents>;
 
-  constructor(config: { events: EventEmitter<QuickQuestEvents> }) {
+  constructor() {
     super({
       name: 'Player',
       pos: vec(112, 160),
@@ -20,16 +19,15 @@ export class Player extends Actor {
       color: Color.Yellow,
       anchor: Vector.Zero
     });
-    this.events = config.events;
     this.destination = this.pos.clone();
 
   }
 
   override onInitialize(engine: Engine): void {
-    this.events.on(PlayerEvents.StartInteraction, (ev) => {
+    conley.on(PlayerEvents.StartInteraction, (ev) => {
       console.info('actioned', ev);
       this.isLocked = true;
-      this.events.emit(DialogEvents.ShowDialog, new ShowDialogEvent(ev.other!));
+      conley.emit(DialogEvents.ShowDialog, new ShowDialogEvent(ev.other!));
     });
   }
 
@@ -93,7 +91,7 @@ export class Player extends Actor {
     const trigger = this.scene?.triggers.find((trigger) => trigger.pos.equals(target));
     if (entity) {
       console.info(`Talking to ${entity.name}`);
-      this.events.emit(PlayerEvents.StartInteraction, new InteractionStartEvent(this, entity));
+      conley.emit(PlayerEvents.StartInteraction, new InteractionStartEvent(this, entity));
     }
     if (trigger) {
       console.info("About to be triggered", trigger)

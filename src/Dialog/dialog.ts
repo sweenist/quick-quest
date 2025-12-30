@@ -1,15 +1,13 @@
-import { Actor, Engine, EventEmitter, NineSlice, NineSliceStretch, vec } from "excalibur";
+import { Actor, Engine, NineSlice, NineSliceStretch, vec } from "excalibur";
 import { Resources } from "../resources";
-import { DialogEvents, QuickQuestEvents } from "../Events/eventTypes";
+import { conley, DialogEvents } from "../Events/eventTypes";
 
 
 export class Dialog extends Actor {
   frame: NineSlice;
-  public events: EventEmitter<QuickQuestEvents>
 
-  constructor(config: { events: EventEmitter<QuickQuestEvents> }) {
+  constructor() {
     super();
-    this.events = config.events
     this.pos = vec(200, 100)
     this.frame = new NineSlice({
       height: 120,
@@ -32,13 +30,13 @@ export class Dialog extends Actor {
   }
 
   onInitialize(engine: Engine): void {
-    this.events.on(DialogEvents.ShowDialog, (ev) => {
+    conley.on(DialogEvents.ShowDialog, (ev) => {
       this.placeFrame(engine.canvas, ev.other)
       this.graphics.use(this.frame);
       console.info('dialog', ev);
     });
 
-    this.events.on(DialogEvents.CloseDialog, () => {
+    conley.on(DialogEvents.CloseDialog, () => {
       this.graphics.hide();
     });
   }

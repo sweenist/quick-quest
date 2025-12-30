@@ -1,4 +1,4 @@
-import { ActorEvents } from "excalibur"
+import { EventEmitter } from "excalibur"
 import { CloseDialogEvent, InteractionCompleteEvent, InteractionStartEvent, ShowDialogEvent } from "./events"
 
 type PlayerEvents = {
@@ -21,4 +21,6 @@ export const DialogEvents = {
   CloseDialog: 'closeDialog'
 } as const;
 
-export type QuickQuestEvents = PlayerEvents & DialogEvents & ActorEvents;
+export type QuickQuestEvents = PlayerEvents & DialogEvents;
+
+export const conley = new EventEmitter<QuickQuestEvents>();
