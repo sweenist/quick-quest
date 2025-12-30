@@ -14,6 +14,7 @@
     max-height: 95dvh;
     max-width: 1280px;
     align-items: center;
+    position: relative;
   }
 
   canvas {
@@ -29,8 +30,14 @@
     border-image-slice: 8 8 8 8 fill;
     border-image-width: 8px;
     position: absolute;
-    top: 180px;
+    bottom: 0;
     width: 96%;
+    height: 0;
+    transition: height 418ms ease;
+  }
+
+  #dialog-frame[data-display="show"] {
+    height: 50%;
   }
 
   [data-visible="false"] {
