@@ -1,36 +1,17 @@
-import { Actor, ActorEvents, Color, Engine, EventEmitter, GameEvent, Keys, TileMap, vec, Vector } from "excalibur";
+import { Actor, Color, Engine, EventEmitter, Keys, TileMap, vec, Vector } from "excalibur";
 import { moveToTarget } from "../Utils/moveUtils";
 import { Direction } from "../types";
 import { Directions, FacingVectors } from "../constants";
-
-type PlayerEvents = ActorEvents & {
-  startInteraction: InteractionStartEvent
-  completeInteraction: InteractionCompleteEvent
-}
-
-export const PlayerEvents = {
-  StartInteraction: 'startInteraction',
-  CompleteInteraction: 'completeInteraction'
-} as const
-
-export class InteractionStartEvent extends GameEvent<Player> {
-  constructor(self: Player) {
-    super();
-  }
-}
-export class InteractionCompleteEvent extends GameEvent<Player> {
-  constructor(self: Player) {
-    super();
-  }
-}
+import { DialogEvents, PlayerEvents, QuickQuestEvents } from "../Events/eventTypes";
+import { InteractionStartEvent, ShowDialogEvent } from "../Events/events";
 
 export class Player extends Actor {
   isLocked: boolean = false;
   destination: Vector;
   facing: Direction = Directions.Down;
-  public events = new EventEmitter<PlayerEvents & ActorEvents>()
+  public events: EventEmitter<QuickQuestEvents>;
 
-  constructor() {
+  constructor(config: { events: EventEmitter<QuickQuestEvents> }) {
     super({
       name: 'Player',
       pos: vec(112, 160),
@@ -39,6 +20,7 @@ export class Player extends Actor {
       color: Color.Yellow,
       anchor: Vector.Zero
     });
+    this.events = config.events;
     this.destination = this.pos.clone();
 
   }
@@ -46,14 +28,15 @@ export class Player extends Actor {
   override onInitialize(engine: Engine): void {
     this.events.on(PlayerEvents.StartInteraction, (ev) => {
       console.info('actioned', ev);
-      this.act();
+      this.isLocked = true;
+      this.events.emit(DialogEvents.ShowDialog, new ShowDialogEvent(ev.other!));
     });
   }
 
   update(engine: Engine, elapsed: number): void {
     const { input } = engine;
     if (input.keyboard.wasPressed(Keys.Space) || input.keyboard.wasPressed(Keys.Enter)) {
-      this.events.emit('startInteraction', new InteractionStartEvent(this))
+      this.act();
     }
     const distance = moveToTarget(this.pos, this.destination, 1);
     if (distance < 1) this.tryMove(engine);
@@ -110,6 +93,7 @@ export class Player extends Actor {
     const trigger = this.scene?.triggers.find((trigger) => trigger.pos.equals(target));
     if (entity) {
       console.info(`Talking to ${entity.name}`);
+      this.events.emit(PlayerEvents.StartInteraction, new InteractionStartEvent(this, entity));
     }
     if (trigger) {
       console.info("About to be triggered", trigger)
