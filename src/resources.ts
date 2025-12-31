@@ -1,8 +1,9 @@
-import { ImageSource, Loader } from "excalibur";
+import { ImageSource, Loader } from 'excalibur';
 
 export const Resources = {
-  Sword: new ImageSource("./images/sword.png"),
-  DialogFrame: new ImageSource("./images/FrameBlue.png"),
+  Sword: new ImageSource('./images/sword.png'),
+  DialogFrame: new ImageSource('./images/FrameBlue.png'),
+  GameFont: new ImageSource('./fonts/GameFont.png')
 } as const;
 
 export const loader = new Loader();

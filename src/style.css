@@ -26,7 +26,6 @@
   #dialog-frame {
     border-image-source: url('/images/FrameBlue.png');
     background-color: #111;
-    border-radius: 3%;
     border-image-slice: 8 8 8 8 fill;
     border-image-width: 8px;
     position: absolute;
