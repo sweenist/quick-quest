@@ -9,6 +9,11 @@
     overflow: hidden;
   }
 
+  @font-face {
+    font-family: 'RetroText';
+    src: url('/fonts/PressStart2P.ttf');
+  }
+
   #container {
     aspect-ratio: 16/9;
     max-height: 95dvh;

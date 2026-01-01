@@ -14,6 +14,12 @@ const game = new Engine({
   },
 });
 
+const retroText = new FontFace('RetroText', "url('/fonts/PressStart2P.ttf')");
+
+retroText.load().then((font) => {
+  document.fonts.add(font);
+});
+
 game.start(loader).then(() => {
   game.goToScene('start');
 });
