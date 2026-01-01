@@ -27,20 +27,27 @@ export class Player extends Actor {
     conley.on(PlayerEvents.StartInteraction, (ev) => {
       console.info('actioned', ev);
       this.isLocked = true;
-      conley.emit(DialogEvents.ShowDialog, new ShowDialogEvent(ev.other!));
+      conley.emit(DialogEvents.ShowDialog, new ShowDialogEvent(ev.player, ev.other!));
+    });
+
+    conley.on(DialogEvents.CloseDialog, () => {
+      this.isLocked = false;
     });
   }
 
   update(engine: Engine, elapsed: number): void {
     const { input } = engine;
     if (input.keyboard.wasPressed(Keys.Space) || input.keyboard.wasPressed(Keys.Enter)) {
-      this.act();
+      if (!this.isLocked)
+        this.act();
     }
     const distance = moveToTarget(this.pos, this.destination, 1);
     if (distance < 1) this.tryMove(engine);
   }
 
   tryMove(engine: Engine) {
+    if (this.isLocked) return;
+
     const { input } = engine
     const MOVE_DELTA = 16 as const;
     let nextX = this.destination.x;

@@ -15,10 +15,11 @@ export class InteractionCompleteEvent extends GameEvent<Player> {
   }
 }
 
-export class ShowDialogEvent extends GameEvent<Actor> {
-  constructor(self: Actor) {
+export class ShowDialogEvent extends GameEvent<Actor, Actor> {
+  constructor(self: Actor, other: Actor) {
     super();
-    this.other = self;
+    this.target = self;
+    this.other = other;
   }
 }
 
