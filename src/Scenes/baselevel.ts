@@ -9,7 +9,9 @@ export class BaseLevel extends Scene {
     const player = new Player();
     this.add(player);
 
-    this.dialog = new Dialog();
+    this.dialog = new Dialog({
+      maxFrameHeight: 144
+    });
 
     this.camera.strategy.lockToActor(player);
     this.camera.zoom = 2;

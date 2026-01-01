@@ -1,4 +1,4 @@
-import { Actor, Graphic, vec, Vector } from "excalibur";
+import { Actor, Graphic, Vector } from "excalibur";
 import { conley, DialogEvents } from "../Events/eventTypes";
 
 interface DialogPortraitConfig {

@@ -1,4 +1,4 @@
-import { Actor, Camera, Engine, GraphicsGroup, Keys, NineSlice, NineSliceConfig, NineSliceStretch, Rectangle, vec, Vector } from "excalibur";
+import { Actor, ActorArgs, CoordPlane, Engine, GraphicsGroup, ImageSource, Keys, NineSlice, NineSliceConfig, NineSliceStretch, Rectangle, vec, Vector } from "excalibur";
 import { conley, DialogEvents } from "../Events/eventTypes";
 import { Resources } from "../resources";
 import { TypeWriter, TypeWriterConfig } from "./typewriter";
@@ -6,34 +6,66 @@ import { DialogPortrait } from "./dialog-portrait";
 
 const MAX_FRAME_HEIGHT = 160;
 
+/*
+top: y = 0
+middle: y = screen.height /2 - dialog.height /2
+bottom: y = screen.height - dialogHeight
+*/
+export type DialogPlacement = 'bottom' | 'top' | 'center'
+
+interface DialogConfig {
+  maxFrameHeight: number;
+  placement?: DialogPlacement;
+  frameSource?: ImageSource;
+  frameSourceHeight?: number;
+  frameSourceWidth?: number;
+  frameBottomMargin?: number;
+  frameTopMargin?: number;
+  frameLeftMargin?: number;
+  frameRightMargin?: number;
+  transitionInSpeed?: number;
+  transitionOutSpeed?: number;
+  textSpeed?: number;
+  portraitMargin?: number;
+}
+
 export class Dialog extends Actor {
-  dialogDiv: HTMLDivElement;
   uiGroup: GraphicsGroup;
+  placement: DialogPlacement;
   frame: NineSlice;
   frameState: 'closed' | 'start_growing' | 'growing' | 'done_opening' | 'open' | 'shrinking' = 'closed';
   frameConfig: NineSliceConfig;
   text: TypeWriter | null = null;
   portrait?: DialogPortrait | null = null;
+  portraitMargin: number;
   growthRate: number = 12;
+  transitionInSpeed: number;
+  transitionOutSpeed: number;
+  textSpeed: number
 
-  constructor() {
-    super();
+  constructor(config: DialogConfig & ActorArgs) {
+    super(config);
 
-    this.pos = vec(100, 100);
+    this.pos = config.pos ?? Vector.Zero;
     this.anchor = Vector.Zero;
-    this.dialogDiv = document.querySelector<HTMLDivElement>('#dialog-frame')!;
+    this.placement = config.placement ?? 'bottom';
+    this.portraitMargin = config.portraitMargin ?? 8;
+    this.transform.coordPlane = CoordPlane.Screen;
+    this.transitionInSpeed = config.transitionInSpeed ?? 12;
+    this.transitionOutSpeed = config.transitionOutSpeed ?? this.transitionInSpeed;
+    this.textSpeed = config.textSpeed ?? 25;
 
     this.frameConfig = {
-      source: Resources.DialogFrame,
+      source: config.frameSource ?? Resources.DialogFrame,
       height: 24,
       width: 24,
       sourceConfig: {
-        bottomMargin: 8,
-        topMargin: 8,
-        leftMargin: 8,
-        rightMargin: 8,
-        height: 24,
-        width: 24
+        bottomMargin: config.frameBottomMargin ?? 8,
+        topMargin: config.frameTopMargin ?? 8,
+        leftMargin: config.frameLeftMargin ?? 8,
+        rightMargin: config.frameRightMargin ?? 8,
+        height: config.frameSourceHeight ?? 24,
+        width: config.frameSourceWidth ?? 24
       },
       destinationConfig: {
         drawCenter: true,
@@ -47,7 +79,7 @@ export class Dialog extends Actor {
 
   onInitialize(engine: Engine): void {
     conley.on(DialogEvents.ShowDialog, (ev) => {
-      const { camera } = this.scene;
+      const { camera } = this.scene!;
       const portraitSize = 64 / camera.zoom;
       const portraitOffset = portraitSize / 2;
       this.frameState = 'start_growing';
@@ -81,7 +113,7 @@ export class Dialog extends Actor {
       }
     }
 
-    const { camera } = this.scene;
+    const { camera } = this.scene!;
     switch (this.frameState) {
       case 'start_growing': {
         const xOffset = (engine.canvas.width / 2 / camera.zoom) - (96 / camera.zoom);
