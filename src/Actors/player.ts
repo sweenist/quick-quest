@@ -1,14 +1,16 @@
-import { Actor, Color, Engine, Keys, TileMap, vec, Vector } from "excalibur";
+import { Actor, Animation, AnimationStrategy, Color, Engine, Keys, SpriteSheet, TileMap, vec, Vector } from "excalibur";
 import { moveToTarget } from "../Utils/moveUtils";
 import { Direction } from "../types";
 import { Directions, FacingVectors } from "../constants";
 import { conley, DialogEvents, PlayerEvents } from "../Events/eventTypes";
 import { InteractionStartEvent, ShowDialogEvent } from "../Events/events";
+import { Resources } from "../resources";
 
 export class Player extends Actor {
   isLocked: boolean = false;
   destination: Vector;
   facing: Direction = Directions.Down;
+  animations: Animation[] = [];
 
   constructor() {
     super({
@@ -21,6 +23,23 @@ export class Player extends Actor {
     });
     this.destination = this.pos.clone();
 
+    this.buildAnimations()
+
+  }
+
+  buildAnimations() {
+    const spriteSheet = SpriteSheet.fromImageSource({
+      image: Resources.GreenSlime,
+      grid: {
+        rows: 6,
+        columns: 5,
+        spriteHeight: 16,
+        spriteWidth: 16
+      }
+    });
+    const animation = Animation.fromSpriteSheet(spriteSheet, [0, 1], 250, AnimationStrategy.Loop);
+    this.animations.push(animation);
+    this.graphics.use(animation);
   }
 
   override onInitialize(engine: Engine): void {
