@@ -1,10 +1,8 @@
-import { Actor, ActorArgs, CoordPlane, Engine, GraphicsGroup, ImageSource, Keys, NineSlice, NineSliceConfig, NineSliceStretch, Rectangle, vec, Vector } from "excalibur";
+import { ActorArgs, Engine, GraphicsGroup, ImageSource, Keys, NineSlice, NineSliceConfig, NineSliceStretch, Rectangle, ScreenElement, vec } from "excalibur";
 import { conley, DialogEvents } from "../Events/eventTypes";
 import { Resources } from "../resources";
 import { TypeWriter, TypeWriterConfig } from "./typewriter";
 import { DialogPortrait } from "./dialog-portrait";
-
-const MAX_FRAME_HEIGHT = 160;
 
 /*
 top: y = 0
@@ -12,6 +10,11 @@ middle: y = screen.height /2 - dialog.height /2
 bottom: y = screen.height - dialogHeight
 */
 export type DialogPlacement = 'bottom' | 'top' | 'center'
+const destinationConfig = {
+  drawCenter: true,
+  horizontalStretch: NineSliceStretch.TileFit,
+  verticalStretch: NineSliceStretch.TileFit
+}
 
 interface DialogConfig {
   maxFrameHeight: number;
@@ -27,9 +30,10 @@ interface DialogConfig {
   transitionOutSpeed?: number;
   textSpeed?: number;
   portraitMargin?: number;
+  margin: number;
 }
 
-export class Dialog extends Actor {
+export class Dialog extends ScreenElement {
   uiGroup: GraphicsGroup;
   placement: DialogPlacement;
   frame: NineSlice;
@@ -38,19 +42,20 @@ export class Dialog extends Actor {
   text: TypeWriter | null = null;
   portrait?: DialogPortrait | null = null;
   portraitMargin: number;
+  maxFrameHeight: number;
   growthRate: number = 12;
   transitionInSpeed: number;
   transitionOutSpeed: number;
   textSpeed: number
+  margin: number;
 
   constructor(config: DialogConfig & ActorArgs) {
-    super(config);
+    super({ ...config });
 
-    this.pos = config.pos ?? Vector.Zero;
-    this.anchor = Vector.Zero;
+    this.margin = config.margin ?? 0;
+    this.maxFrameHeight = config.maxFrameHeight;
     this.placement = config.placement ?? 'bottom';
     this.portraitMargin = config.portraitMargin ?? 8;
-    this.transform.coordPlane = CoordPlane.Screen;
     this.transitionInSpeed = config.transitionInSpeed ?? 12;
     this.transitionOutSpeed = config.transitionOutSpeed ?? this.transitionInSpeed;
     this.textSpeed = config.textSpeed ?? 25;
@@ -67,11 +72,7 @@ export class Dialog extends Actor {
         height: config.frameSourceHeight ?? 24,
         width: config.frameSourceWidth ?? 24
       },
-      destinationConfig: {
-        drawCenter: true,
-        horizontalStretch: NineSliceStretch.TileFit,
-        verticalStretch: NineSliceStretch.TileFit
-      }
+      destinationConfig
     };
     this.frame = new NineSlice(this.frameConfig);
     this.uiGroup = new GraphicsGroup({ members: [this.frame] });
@@ -83,8 +84,8 @@ export class Dialog extends Actor {
       const portraitSize = 64 / camera.zoom;
       const portraitOffset = portraitSize / 2;
       this.frameState = 'start_growing';
-      this.pos = ev.target.pos.clone();
-      this.pos.y += 156 / camera.zoom;
+      this.pos = vec(this.margin, engine.canvas.height / camera.zoom);
+      console.info('dialog', this.pos);
       this.portrait = new DialogPortrait({
         portraitGraphic: new Rectangle({
           width: portraitSize,
@@ -100,7 +101,7 @@ export class Dialog extends Actor {
   }
 
   update(engine: Engine, elapsed: number): void {
-    const { input } = engine;
+    const { input, canvas } = engine;
     if (input.keyboard.wasPressed(Keys.Space) && this.frameState === 'open') {
       if (this.text?.isDone) {
         this.frameState = 'shrinking';
@@ -116,20 +117,18 @@ export class Dialog extends Actor {
     const { camera } = this.scene!;
     switch (this.frameState) {
       case 'start_growing': {
-        const xOffset = (engine.canvas.width / 2 / camera.zoom) - (96 / camera.zoom);
-        this.pos.x = this.pos.x - xOffset;
         this.frameState = 'growing';
-        this.frame.setTargetWidth(568 / camera.zoom, true);
+        this.frame.setTargetWidth((canvas.width / camera.zoom) - this.margin, true);
         this.frame = this.frame.clone();
         this.graphics.use(this.frame);
         break;
       }
       case 'growing': {
-        this.frame.setTargetHeight(this.frame.height + 12, true);
-        this.pos.y -= 12
-        if (this.frame.height >= (MAX_FRAME_HEIGHT / camera.zoom)) {
+        this.frame.setTargetHeight(this.frame.height + this.transitionInSpeed, true);
+        this.pos.y -= this.transitionInSpeed
+        if (this.frame.height >= (this.maxFrameHeight / camera.zoom)) {
           this.frameState = 'done_opening';
-          this.frame.setTargetHeight(MAX_FRAME_HEIGHT / camera.zoom, true);
+          this.frame.setTargetHeight(this.maxFrameHeight / camera.zoom, true);
         }
         this.frame = this.frame.clone();
         this.graphics.use(this.uiGroup);
@@ -148,8 +147,8 @@ export class Dialog extends Actor {
       }
       case "shrinking":
         {
-          this.frame.setTargetHeight(this.frame.height - 12, true);
-          this.pos.y += 12
+          this.frame.setTargetHeight(this.frame.height - this.transitionOutSpeed, true);
+          this.pos.y += this.transitionOutSpeed
           if (this.frame.height == 24) {
             this.frameState = 'closed';
             this.frame.setTargetHeight(24);
