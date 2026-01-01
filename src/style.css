@@ -20,6 +20,9 @@
     max-width: 1280px;
     align-items: center;
     position: relative;
+    padding: 1px;
+    border: 2px white solid;
+    border-radius: 8px;
   }
 
   canvas {
