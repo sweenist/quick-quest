@@ -89,7 +89,7 @@ export class Dialog extends ScreenElement {
       const portraitSize = 64;
       const portraitOffset = portraitSize / 2;
       this.frameState = 'start_growing';
-      this.pos = vec(this.margin, engine.screen.height);
+      this.pos = vec(this.margin, engine.screen.height - this.frame.height / 2);
       console.info('dialog', this.pos);
       this.portrait = new DialogPortrait({
         portraitGraphic: new Rectangle({
@@ -100,6 +100,8 @@ export class Dialog extends ScreenElement {
       });
       this.addChild(this.portrait);
     });
+
+    // this.scale = vec(this.scene?.camera.zoom ?? 1, 1)
   }
 
   update(engine: Engine, elapsed: number): void {
@@ -152,7 +154,7 @@ export class Dialog extends ScreenElement {
         {
           this.frame.setTargetHeight(this.frame.height - this.transitionOutSpeed, true);
           this.pos.y += this.transitionOutSpeed
-          if (this.frame.height == 24) {
+          if (this.frame.height === 24) {
             this.frameState = 'closed';
             this.frame.setTargetHeight(24);
             this.uiGroup.members = [this.frame];
