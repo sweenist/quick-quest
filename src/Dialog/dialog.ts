@@ -32,7 +32,7 @@ interface DialogConfig {
   textSize?: number;
   textLineHeight?: number;
   portraitMargin?: number;
-  margin: number;
+  margin?: number;
 }
 
 export class Dialog extends ScreenElement {
@@ -103,7 +103,7 @@ export class Dialog extends ScreenElement {
   }
 
   update(engine: Engine, elapsed: number): void {
-    const { input } = engine;
+    const { input, canvas } = engine;
 
     if (input.keyboard.wasPressed(Keys.Space) && this.frameState === 'open') {
       if (this.text?.isDone) {
@@ -121,6 +121,7 @@ export class Dialog extends ScreenElement {
       case 'start_growing': {
         this.frameState = 'growing';
         this.frame.setTargetWidth((engine.screen.width) - this.margin * 2, true);
+        console.info(this.frame, engine.screen);
         this.frame = this.frame.clone();
         this.graphics.use(this.frame);
         break;

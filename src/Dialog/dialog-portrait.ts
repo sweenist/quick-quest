@@ -1,4 +1,4 @@
-import { Actor, Graphic, Vector } from "excalibur";
+import { Graphic, ScreenElement, Vector } from "excalibur";
 import { conley, DialogEvents } from "../Events/eventTypes";
 
 interface DialogPortraitConfig {
@@ -6,7 +6,7 @@ interface DialogPortraitConfig {
   position: Vector
 }
 
-export class DialogPortrait extends Actor {
+export class DialogPortrait extends ScreenElement {
   portraitGraphic: Graphic;
 
   constructor(config: DialogPortraitConfig) {
