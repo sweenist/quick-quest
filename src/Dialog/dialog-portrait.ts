@@ -10,11 +10,10 @@ export class DialogPortrait extends ScreenElement {
   portraitGraphic: Graphic;
 
   constructor(config: DialogPortraitConfig) {
-    super();
+    super({ width: config.portraitGraphic.width, height: config.portraitGraphic.height });
     this.portraitGraphic = config.portraitGraphic;
     this.pos = config.position;
     this.anchor = Vector.Zero;
-    // TODO: figure out collider stuff
     this.graphics.use(this.portraitGraphic);
     this.graphics.hide();
   }
