@@ -1,7 +1,6 @@
-import { Camera, CameraEvents, Engine, GameEvent, Scene } from "excalibur";
+import { Engine, Scene } from "excalibur";
 import { Player } from "../Actors/player";
 import { Dialog } from "../Dialog/dialog";
-
 
 export class BaseLevel extends Scene {
   public dialog!: Dialog;
@@ -11,7 +10,8 @@ export class BaseLevel extends Scene {
     this.add(player);
 
     this.dialog = new Dialog({
-      maxFrameHeight: 144
+      maxFrameHeight: 144,
+      margin: 12,
     });
 
     this.camera.strategy.lockToActor(player);
