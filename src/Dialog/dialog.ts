@@ -10,6 +10,7 @@ import {
   Screen,
   ScreenElement,
   vec,
+  Vector,
 } from "excalibur";
 import { conley, DialogEvents } from "../Events/eventTypes";
 import { Resources } from "../resources";
@@ -81,6 +82,8 @@ export class Dialog extends ScreenElement {
     this.transitionOutSpeed =
       config.transitionOutSpeed ?? this.transitionInSpeed;
 
+    this.anchor = this.placement === 'bottom' ? vec(0, 1) : this.anchor;
+
     this.frameConfig = {
       source: config.frameSource ?? Resources.DialogFrame,
       height: 24,
@@ -100,22 +103,23 @@ export class Dialog extends ScreenElement {
 
   onInitialize(engine: Engine): void {
     conley.on(DialogEvents.ShowDialog, (ev) => {
-      const { screen } = engine;
+
       const portraitSize = 64;
       const portraitOffset = portraitSize / 2;
       this.frameState = "start_growing";
-      this.pos = vec(this.margin, screen.canvasHeight / screen.pixelRatio - this.frame.height / 2);
+      this.pos = this.getDialogPosition(engine.screen);
+      console.info(this.pos)
       this.portrait = new DialogPortrait({
         portraitGraphic: new Rectangle({
           width: portraitSize,
           height: portraitSize,
           color: ev.other?.graphics.color,
         }),
-        position: vec(portraitOffset, portraitOffset),
+        position: vec(portraitOffset, this.placement === 'bottom' ? -this.maxFrameHeight + portraitOffset : portraitOffset),
       });
       const textPosX = this.portrait ? this.portrait.width + this.margin * 2 : this.margin;
       const textAreaWidth = this.frame.width - textPosX - (this.margin * 4);
-      const textPosition = vec(textPosX, 0);
+      const textPosition = vec(textPosX, this.placement === 'bottom' ? -this.maxFrameHeight : 0);
       this.text = new DialogText({
         pos: textPosition,
         height: this.maxFrameHeight,
@@ -155,7 +159,6 @@ export class Dialog extends ScreenElement {
           this.frame.height + this.transitionInSpeed,
           true
         );
-        this.pos.y -= this.transitionInSpeed;
         if (this.frame.height >= this.maxFrameHeight) {
           this.frameState = "done_opening";
           this.frame.setTargetHeight(this.maxFrameHeight, true);
@@ -175,7 +178,7 @@ export class Dialog extends ScreenElement {
           this.frame.height - this.transitionOutSpeed,
           true
         );
-        this.pos.y += this.transitionOutSpeed;
+        // this.pos.y += this.transitionOutSpeed;
         if (this.frame.height === 24) {
           this.frameState = "closed";
           this.frame.setTargetHeight(24);
@@ -193,5 +196,16 @@ export class Dialog extends ScreenElement {
     const pixelRatio = screen?.pixelRatio === 0 ? 1 : screen.pixelRatio;
     const baseWidth = screen?.canvasWidth / pixelRatio
     return baseWidth - (margin * 2);
+  }
+
+  private getDialogPosition(screen: Screen): Vector {
+    switch (this.placement) {
+      case 'bottom':
+        return vec(this.margin, screen.canvasHeight / screen.pixelRatio);
+      case 'top':
+        return vec(this.margin, 0);
+      case 'center':
+        return vec(this.margin, screen.halfCanvasHeight / screen.pixelRatio);
+    }
   }
 }

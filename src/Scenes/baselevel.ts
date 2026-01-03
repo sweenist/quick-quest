@@ -12,7 +12,8 @@ export class BaseLevel extends Scene {
     this.dialog = new Dialog({
       maxFrameHeight: 144,
       margin: 12,
-      screen: engine.screen
+      screen: engine.screen,
+      placement: 'bottom'
     });
 
     this.camera.strategy.lockToActor(player);
