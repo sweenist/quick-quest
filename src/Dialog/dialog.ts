@@ -7,6 +7,7 @@ import {
   NineSliceConfig,
   NineSliceStretch,
   Rectangle,
+  Screen,
   ScreenElement,
   vec,
 } from "excalibur";
@@ -29,6 +30,7 @@ const destinationConfig = {
 
 interface DialogConfig {
   maxFrameHeight: number;
+  screen: Screen;
   placement?: DialogPlacement;
   frameSource?: ImageSource;
   frameSourceHeight?: number;
@@ -68,7 +70,8 @@ export class Dialog extends ScreenElement {
   margin: number;
 
   constructor(config: DialogConfig & DialogTextConfig & ActorArgs) {
-    super({ ...config });
+    const dialogWidth = Dialog.getDialogWidth(config.screen, config.margin ?? 0)
+    super({ ...config, });
     this._config = config;
     this.margin = config.margin ?? 0;
     this.maxFrameHeight = config.maxFrameHeight;
@@ -81,7 +84,7 @@ export class Dialog extends ScreenElement {
     this.frameConfig = {
       source: config.frameSource ?? Resources.DialogFrame,
       height: 24,
-      width: 24,
+      width: dialogWidth,
       sourceConfig: {
         bottomMargin: config.frameBottomMargin ?? 8,
         topMargin: config.frameTopMargin ?? 8,
@@ -97,10 +100,11 @@ export class Dialog extends ScreenElement {
 
   onInitialize(engine: Engine): void {
     conley.on(DialogEvents.ShowDialog, (ev) => {
+      const { screen } = engine;
       const portraitSize = 64;
       const portraitOffset = portraitSize / 2;
       this.frameState = "start_growing";
-      this.pos = vec(this.margin, engine.screen.height - this.frame.height / 2);
+      this.pos = vec(this.margin, screen.canvasHeight / screen.pixelRatio - this.frame.height / 2);
       this.portrait = new DialogPortrait({
         portraitGraphic: new Rectangle({
           width: portraitSize,
@@ -110,7 +114,7 @@ export class Dialog extends ScreenElement {
         position: vec(portraitOffset, portraitOffset),
       });
       const textPosX = this.portrait ? this.portrait.width + this.margin * 2 : this.margin;
-      const textAreaWidth = engine.screen.width - textPosX - (this.margin * 4);
+      const textAreaWidth = this.frame.width - textPosX - (this.margin * 4);
       const textPosition = vec(textPosX, 0);
       this.text = new DialogText({
         pos: textPosition,
@@ -123,8 +127,6 @@ export class Dialog extends ScreenElement {
       this.addChild(this.portrait);
       this.addChild(this.text);
     });
-    console.info('width', engine.canvas.width, engine.screen.canvasWidth, engine.screen.width)
-    // this.scale = vec(this.scene?.camera.zoom ?? 1, 1)
   }
 
   update(engine: Engine, elapsed: number): void {
@@ -145,8 +147,6 @@ export class Dialog extends ScreenElement {
     switch (this.frameState) {
       case "start_growing": {
         this.frameState = "growing";
-        this.frame.setTargetWidth((engine.screen.width * this.globalScale.x) - this.margin * 2, true);
-        this.frame = this.frame.clone();
         this.graphics.use(this.frame);
         break;
       }
@@ -168,9 +168,6 @@ export class Dialog extends ScreenElement {
         this.frameState = "open";
         this.portrait?.show();
         this.text?.show();
-
-        this.frame = this.frame.clone();
-        this.graphics.use(this.frame);
         break;
       }
       case "shrinking": {
@@ -190,5 +187,11 @@ export class Dialog extends ScreenElement {
         break;
       }
     }
+  }
+
+  private static getDialogWidth(screen: Screen, margin: number) {
+    const pixelRatio = screen?.pixelRatio === 0 ? 1 : screen.pixelRatio;
+    const baseWidth = screen?.canvasWidth / pixelRatio
+    return baseWidth - (margin * 2);
   }
 }
