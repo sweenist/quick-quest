@@ -1,7 +1,6 @@
 import {
   ActorArgs,
   Engine,
-  GraphicsGroup,
   ImageSource,
   Keys,
   NineSlice,
@@ -48,7 +47,7 @@ interface DialogConfig {
 }
 
 export class Dialog extends ScreenElement {
-  uiGroup: GraphicsGroup;
+  private _config: DialogConfig;
   placement: DialogPlacement;
   frame: NineSlice;
   frameState:
@@ -59,7 +58,7 @@ export class Dialog extends ScreenElement {
     | "open"
     | "shrinking" = "closed";
   frameConfig: NineSliceConfig;
-  text: DialogText;
+  text: DialogText | null = null;
   portrait?: DialogPortrait | null = null;
   portraitMargin: number;
   maxFrameHeight: number;
@@ -70,7 +69,7 @@ export class Dialog extends ScreenElement {
 
   constructor(config: DialogConfig & DialogTextConfig & ActorArgs) {
     super({ ...config });
-
+    this._config = config;
     this.margin = config.margin ?? 0;
     this.maxFrameHeight = config.maxFrameHeight;
     this.placement = config.placement ?? "bottom";
@@ -94,8 +93,6 @@ export class Dialog extends ScreenElement {
       destinationConfig,
     };
     this.frame = new NineSlice(this.frameConfig);
-    this.text = new DialogText({ ...config });
-    this.uiGroup = new GraphicsGroup({ members: [this.frame] });
   }
 
   onInitialize(engine: Engine): void {
@@ -112,11 +109,21 @@ export class Dialog extends ScreenElement {
         }),
         position: vec(portraitOffset, portraitOffset),
       });
-      console.info(this.portrait)
+      const textPosX = this.portrait ? this.portrait.width + this.margin * 2 : this.margin;
+      const textAreaWidth = engine.screen.width - textPosX - (this.margin * 4);
+      const textPosition = vec(textPosX, 0);
+      this.text = new DialogText({
+        pos: textPosition,
+        height: this.maxFrameHeight,
+        width: textAreaWidth,
+        message: "This is some sample text. You are in the throne room\n        \nLine break",
+        ...this._config,
+      });
+
       this.addChild(this.portrait);
       this.addChild(this.text);
     });
-
+    console.info('width', engine.canvas.width, engine.screen.canvasWidth, engine.screen.width)
     // this.scale = vec(this.scene?.camera.zoom ?? 1, 1)
   }
 
@@ -138,7 +145,7 @@ export class Dialog extends ScreenElement {
     switch (this.frameState) {
       case "start_growing": {
         this.frameState = "growing";
-        this.frame.setTargetWidth(engine.screen.width - this.margin * 2, true);
+        this.frame.setTargetWidth((engine.screen.width * this.globalScale.x) - this.margin * 2, true);
         this.frame = this.frame.clone();
         this.graphics.use(this.frame);
         break;
@@ -154,20 +161,16 @@ export class Dialog extends ScreenElement {
           this.frame.setTargetHeight(this.maxFrameHeight, true);
         }
         this.frame = this.frame.clone();
-        this.graphics.use(this.uiGroup);
+        this.graphics.use(this.frame);
         break;
       }
       case "done_opening": {
         this.frameState = "open";
         this.portrait?.show();
-        this.text?.configure(
-          vec(this.margin + (this.portrait?.width ?? 0), 0),
-          "This is some sample text. You are in the throne room\n        \nLine break",
-          engine.screen.width
-        );
+        this.text?.show();
 
         this.frame = this.frame.clone();
-        this.graphics.use(this.uiGroup);
+        this.graphics.use(this.frame);
         break;
       }
       case "shrinking": {

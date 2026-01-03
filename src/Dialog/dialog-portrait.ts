@@ -14,8 +14,6 @@ export class DialogPortrait extends ScreenElement {
     this.portraitGraphic = config.portraitGraphic;
     this.pos = config.position;
     this.anchor = Vector.Zero;
-    this.graphics.use(this.portraitGraphic);
-    this.graphics.hide();
   }
 
   onInitialize(engine: ex.Engine): void {

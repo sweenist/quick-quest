@@ -15,7 +15,7 @@ export class BaseLevel extends Scene {
     });
 
     this.camera.strategy.lockToActor(player);
-    // this.camera.zoom = 2;
+    this.camera.zoom = 2;
 
     this.add(this.dialog);
   }

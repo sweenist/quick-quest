@@ -1,25 +1,28 @@
-import { ScreenElement, Vector, Color } from 'excalibur';
+import { ScreenElement, Color, ActorArgs } from 'excalibur';
 import { TypeWriter, TypeWriterConfig } from "./typewriter";
-import { Dialog } from "./dialog";
 
 export interface DialogTextConfig {
   textSpeed?: number;
   textLineHeight?: number;
   textSize?: number;
+  message?: string;
 }
 
 export class DialogText extends ScreenElement {
-  text: TypeWriter | null = null;
+  text: TypeWriter
   textSpeed: number;
   textLineHeight: number;
   textSize: number;
 
-  constructor(config: DialogTextConfig) {
-    super();
-
+  constructor(config: DialogTextConfig & ActorArgs) {
+    super({ ...config });
+    console.info(config)
     this.textSpeed = config.textSpeed ?? 25;
     this.textSize = config.textSize ?? 16;
     this.textLineHeight = config.textLineHeight ?? 24;
+
+    const typeWriterConfig = this.buildTypeWriterConfig(config.message!);
+    this.text = new TypeWriter(typeWriterConfig);
   }
 
   get isDone() {
@@ -32,19 +35,14 @@ export class DialogText extends ScreenElement {
 
   close() {
     this.graphics.hide();
-    this.text = null;
   }
 
-  configure(position: Vector, text: string, width: number) {
-    this.pos = position;
-    const config = this.buildTypeWriterConfig(text, width);
-    console.info(position, config)
-    this.text = new TypeWriter(config);
+  show() {
+    console.info(this)
     this.graphics.use(this.text);
   }
 
-  private buildTypeWriterConfig(text: string, width: number): TypeWriterConfig {
-    const parent = this.parent as Dialog;
+  private buildTypeWriterConfig(text: string): TypeWriterConfig {
     return {
       text,
       color: Color.White,
@@ -52,9 +50,9 @@ export class DialogText extends ScreenElement {
       textConfig: {
         align: "left",
         vAlign: "top",
-        height: parent.maxFrameHeight,
+        height: this.height,
         lineHeight: this.textLineHeight,
-        width: width - parent.margin * 2,
+        width: this.width,
         x: this.textSize,
         y: this.textSize,
         fontSize: this.textSize,
