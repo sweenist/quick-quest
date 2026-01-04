@@ -1,11 +1,11 @@
-import { Actor, Animation, AnimationStrategy, Color, Engine, Keys, SpriteSheet, TileMap, vec, Vector } from "excalibur";
+import { Actor, Animation, AnimationStrategy, Color, Engine, Keys, TileMap, vec, Vector } from "excalibur";
 import { moveToTarget } from "../Utils/move-utils";
 import { Direction } from "../types";
 import { Directions, FacingVectors } from "../constants";
 import { conley, DialogEvents, PlayerEvents } from "../Events/eventTypes";
 import { InteractionStartEvent, ShowDialogEvent } from "../Events/events";
-import { Resources } from "../resources";
 import { VerbalActor } from "./verbal-actor";
+import { SpriteSheets } from "../Configuration/sprite-sheets";
 
 export class Player extends Actor {
   isLocked: boolean = false;
@@ -29,23 +29,13 @@ export class Player extends Actor {
   }
 
   buildAnimations() {
-    const spriteSheet = SpriteSheet.fromImageSource({
-      image: Resources.GreenSlime,
-      grid: {
-        rows: 6,
-        columns: 5,
-        spriteHeight: 16,
-        spriteWidth: 16
-      }
-    });
-    const animation = Animation.fromSpriteSheet(spriteSheet, [0, 1], 250, AnimationStrategy.Loop);
+    const animation = Animation.fromSpriteSheet(SpriteSheets.Player, [0, 1], 250, AnimationStrategy.Loop);
     this.animations.push(animation);
     this.graphics.use(animation);
   }
 
   override onInitialize(engine: Engine): void {
     conley.on(PlayerEvents.StartInteraction, (ev) => {
-      console.info('actioned', ev);
       this.isLocked = true;
       conley.emit(DialogEvents.ShowDialog, new ShowDialogEvent(ev.player, ev.other!));
     });
@@ -117,7 +107,6 @@ export class Player extends Actor {
     const entity = this.scene?.actors.find((actor) => actor.pos.equals(target));
     const trigger = this.scene?.triggers.find((trigger) => trigger.pos.equals(target));
     if (entity && entity instanceof VerbalActor) {
-      console.info(`Talking to ${entity.name}`);
       conley.emit(PlayerEvents.StartInteraction, new InteractionStartEvent(this, entity));
     }
     if (trigger) {
