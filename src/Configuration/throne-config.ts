@@ -1,5 +1,6 @@
-import { Color } from "excalibur";
+import { Color, vec } from "excalibur";
 import { storyFlags } from "./story-flags";
+import { Resources } from "../resources";
 
 export const config = {
   room: [
@@ -22,10 +23,22 @@ export const config = {
       dialog: [
         {
           message: "I'm da king baby! Grovel before me!",
+          portraitConfig: {
+            image: Resources.Portrait,
+            imageWidth: 48,
+            imageHeight: 48,
+            scale: vec(2, 2),
+          }
         },
         {
           message: "Oh? An adventurer. Our daughter was taken by a dragon! Fetch her!",
-          requires: [storyFlags.throne_queen_talked_1]
+          requires: [storyFlags.throne_queen_talked_1],
+          portraitConfig: {
+            image: Resources.Portrait,
+            imageWidth: 48,
+            imageHeight: 48,
+            scale: vec(2, 2),
+          }
         }
       ]
     },

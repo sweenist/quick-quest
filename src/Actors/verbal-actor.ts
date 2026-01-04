@@ -1,4 +1,4 @@
-import { Actor, ActorArgs, Graphic, ImageSource } from "excalibur"
+import { Actor, ActorArgs, Graphic, ImageSource, Vector } from "excalibur"
 import { DialogPlacement } from "../types";
 
 
@@ -7,15 +7,16 @@ export type DialogScenario = {
   requires?: string[];
   bypass?: string[];
   addFlag?: string;
-  portraitConfig?: portraitConfig;
+  portraitConfig?: PortraitConfig;
 }
 
-export type portraitConfig = {
+export type PortraitConfig = {
   image: ImageSource;
   imageWidth: number;
   imageHeight: number;
-  placement: DialogPlacement;
+  placement?: DialogPlacement;
   frame?: number;
+  scale?: Vector;
 }
 
 interface VerbalActorArgs {
