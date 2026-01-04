@@ -22,7 +22,7 @@ export const config = {
       x: 112, y: 48, color: Color.Red, name: 'King',
       dialog: [
         {
-          message: "I'm da king baby! Grovel before me!",
+          message: ["I'm da king baby! Grovel before me!", "Oh yeah!"],
           portraitConfig: {
             image: SpriteSheets.Portraits,
             imageWidth: 48,

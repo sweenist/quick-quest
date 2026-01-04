@@ -3,7 +3,7 @@ import { DialogPlacement } from "../types";
 
 
 export type DialogScenario = {
-  message: string;
+  message: string | string[];
   requires?: string[];
   bypass?: string[];
   addFlag?: string;

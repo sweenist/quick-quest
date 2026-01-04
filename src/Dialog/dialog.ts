@@ -135,12 +135,14 @@ export class Dialog extends ScreenElement {
     const { input } = engine;
 
     if (input.keyboard.wasPressed(Keys.Space) && this.frameState === "open") {
-      if (this.text?.isDone) {
+      if (this.text?.isAllDone) {
         this.frameState = "shrinking";
         this.text.close();
         this.removeAllChildren();
+        console.info('closing dialog');
         conley.emit(DialogEvents.CloseDialog);
       } else {
+        console.info('fill text');
         this.text?.finish();
       }
     }

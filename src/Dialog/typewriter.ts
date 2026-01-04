@@ -51,6 +51,8 @@ export class TypeWriter extends Graphic {
   isFinishing: boolean = false;
   color: Color;
   cnvTextConfig: CanvasTextConfig;
+  contentHeight!: number;
+  originalY: number;
 
   constructor(config: TypeWriterConfig) {
     super({
@@ -59,6 +61,7 @@ export class TypeWriter extends Graphic {
     });
     this.endStringText = config.text;
     this.cnvTextConfig = config.textConfig;
+    this.originalY = config.textConfig.y;
 
     this.currentStringText = "";
     this.color = config.color || Color.White;
@@ -81,9 +84,22 @@ export class TypeWriter extends Graphic {
   reset() {
     this.stringIndex = 0;
     this.currentStringText = "";
+    this.cnvTextConfig.y = this.originalY;
     this.lastTimestamp = 0;
     this.isDone = false;
     this.isFinishing = false;
+  }
+
+  scroll(increment: number) {
+    this.cnvTextConfig.y -= increment;
+  }
+
+  get scrollable() {
+    return Math.abs(this.cnvTextConfig.y) < this.contentHeight;
+  }
+
+  setNextText(message: string) {
+    this.endStringText = message;
   }
 
   finish() {
@@ -122,7 +138,7 @@ export class TypeWriter extends Graphic {
 
     // draw image to ex
 
-    drawText(this.ctx, this.currentStringText, this.cnvTextConfig);
+    this.contentHeight = (drawText(this.ctx, this.currentStringText, this.cnvTextConfig)).height;
     this.cnv.setAttribute("forceUpload", "true");
     ex.drawImage(this.cnv, x, y);
   }
