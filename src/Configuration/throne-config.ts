@@ -1,6 +1,6 @@
 import { Color, vec } from "excalibur";
 import { storyFlags } from "./story-flags";
-import { Resources } from "../resources";
+import { SpriteSheets } from "./sprite-sheets";
 
 export const config = {
   room: [
@@ -24,9 +24,10 @@ export const config = {
         {
           message: "I'm da king baby! Grovel before me!",
           portraitConfig: {
-            image: Resources.Portrait,
+            image: SpriteSheets.Portraits,
             imageWidth: 48,
             imageHeight: 48,
+            frame: 0,
             scale: vec(2, 2),
           }
         },
@@ -34,9 +35,10 @@ export const config = {
           message: "Oh? An adventurer. Our daughter was taken by a dragon! Fetch her!",
           requires: [storyFlags.throne_queen_talked_1],
           portraitConfig: {
-            image: Resources.Portrait,
+            image: SpriteSheets.Portraits,
             imageWidth: 48,
             imageHeight: 48,
+            frame: 0,
             scale: vec(2, 2),
           }
         }
@@ -47,11 +49,25 @@ export const config = {
       dialog: [
         {
           message: "Ew! Peasant slime! I suppose you're here for a quest?",
-          adds: [storyFlags.throne_queen_talked_1]
+          adds: [storyFlags.throne_queen_talked_1],
+          portraitConfig: {
+            image: SpriteSheets.Portraits,
+            imageWidth: 48,
+            imageHeight: 48,
+            frame: 2,
+            scale: vec(2, 2),
+          }
         },
         {
           message: "Yes, if you could go up north and fetch our daughter from the nasty dragon...",
-          requires: [storyFlags.throne_king_talked_1]
+          requires: [storyFlags.throne_king_talked_1],
+          portraitConfig: {
+            image: SpriteSheets.Portraits,
+            imageWidth: 48,
+            imageHeight: 48,
+            frame: 1,
+            scale: vec(2, 2),
+          }
         }
       ]
     }

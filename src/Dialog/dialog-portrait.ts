@@ -1,20 +1,25 @@
-import { Graphic, ScreenElement, Vector } from "excalibur";
+import { ActorArgs, ScreenElement, Sprite, SpriteSheet, Vector } from "excalibur";
 import { conley, DialogEvents } from "../Events/eventTypes";
+import { DialogPlacement } from "../types";
+import { PortraitConfig } from "../Actors/verbal-actor";
 
-interface DialogPortraitConfig {
-  portraitGraphic: Graphic,
-  position: Vector,
-  scale?: Vector
-}
 
 export class DialogPortrait extends ScreenElement {
-  portraitGraphic: Graphic;
+  portraitGraphic: SpriteSheet;
+  sprite: Sprite;
+  placement: DialogPlacement;
 
-  constructor(config: DialogPortraitConfig) {
-    super({ width: config.portraitGraphic.width, height: config.portraitGraphic.height, scale: config.scale });
-    this.portraitGraphic = config.portraitGraphic;
-    this.pos = config.position;
+  constructor(config: PortraitConfig & ActorArgs) {
+    super({ width: config.imageWidth, height: config.imageHeight ?? config.imageWidth, scale: config.scale });
+    this.portraitGraphic = config.image;
+    this.pos = config.pos ?? Vector.Zero;
     this.anchor = Vector.Zero;
+    this.sprite = this.portraitGraphic.sprites[config.frame as number]
+    this.placement = config.placement ?? 'bottom';
+  }
+
+  get normalizedWidth() {
+    return this.width / this.scale.x;
   }
 
   onInitialize(engine: ex.Engine): void {
@@ -24,6 +29,6 @@ export class DialogPortrait extends ScreenElement {
   }
 
   show() {
-    this.graphics.use(this.portraitGraphic);
+    this.graphics.use(this.sprite);
   }
 }

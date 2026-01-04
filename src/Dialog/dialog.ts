@@ -8,7 +8,6 @@ import {
   NineSliceStretch,
   Screen,
   ScreenElement,
-  Sprite,
   vec,
   Vector,
 } from "excalibur";
@@ -104,18 +103,12 @@ export class Dialog extends ScreenElement {
       const dialogConfig = ev.other?.dialog;
       if (dialogConfig && dialogConfig[0].portraitConfig) {
         const portraitConfig = dialogConfig[0].portraitConfig
-        const portraitSize = Math.max(portraitConfig.imageHeight, portraitConfig.imageWidth);
+        const portraitSize = Math.max(portraitConfig.imageHeight ?? 0, portraitConfig.imageWidth);
         const portraitOffset = portraitSize / 2;
         this.portrait = new DialogPortrait({
-          portraitGraphic: new Sprite({
-            width: portraitConfig.imageWidth,
-            height: portraitConfig.imageHeight,
-            image: portraitConfig.image,
-            scale: portraitConfig.scale,
-          }),
-          position: vec(portraitOffset, this.placement === 'bottom' ? -this.maxFrameHeight + portraitOffset : portraitOffset),
+          ...dialogConfig[0].portraitConfig,
+          pos: vec(portraitOffset, this.placement === 'bottom' ? -this.maxFrameHeight + portraitOffset : portraitOffset),
         });
-
         this.addChild(this.portrait);
       }
       else {
@@ -123,7 +116,7 @@ export class Dialog extends ScreenElement {
       }
 
       const message = dialogConfig && dialogConfig[0] ? dialogConfig[0].message : 'PLACEHOLDER';
-      const textPosX = this.portrait ? this.portrait.width + this.margin * 2 : this.margin;
+      const textPosX = this.portrait ? this.portrait.normalizedWidth + this.margin * 2 : this.margin;
       const textAreaWidth = this.frame.width - textPosX - (this.margin * 4);
       const textPosition = vec(textPosX, this.placement === 'bottom' ? -this.maxFrameHeight : 0);
       this.text = new DialogText({

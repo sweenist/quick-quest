@@ -1,4 +1,4 @@
-import { Actor, ActorArgs, Graphic, ImageSource, Vector } from "excalibur"
+import { Actor, ActorArgs, Graphic, SpriteSheet, Vector } from "excalibur"
 import { DialogPlacement } from "../types";
 
 
@@ -11,9 +11,9 @@ export type DialogScenario = {
 }
 
 export type PortraitConfig = {
-  image: ImageSource;
+  image: SpriteSheet;
   imageWidth: number;
-  imageHeight: number;
+  imageHeight?: number;
   placement?: DialogPlacement;
   frame?: number;
   scale?: Vector;
