@@ -1,5 +1,5 @@
 import { Actor, Animation, AnimationStrategy, Color, Engine, Keys, SpriteSheet, TileMap, vec, Vector } from "excalibur";
-import { moveToTarget } from "../Utils/moveUtils";
+import { moveToTarget } from "../Utils/move-utils";
 import { Direction } from "../types";
 import { Directions, FacingVectors } from "../constants";
 import { conley, DialogEvents, PlayerEvents } from "../Events/eventTypes";
