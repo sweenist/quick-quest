@@ -5,6 +5,7 @@ import { Directions, FacingVectors } from "../constants";
 import { conley, DialogEvents, PlayerEvents } from "../Events/eventTypes";
 import { InteractionStartEvent, ShowDialogEvent } from "../Events/events";
 import { Resources } from "../resources";
+import { VerbalActor } from "./verbal-actor";
 
 export class Player extends Actor {
   isLocked: boolean = false;
@@ -115,7 +116,7 @@ export class Player extends Actor {
     const target = this.pos.clone().add(ray);
     const entity = this.scene?.actors.find((actor) => actor.pos.equals(target));
     const trigger = this.scene?.triggers.find((trigger) => trigger.pos.equals(target));
-    if (entity) {
+    if (entity && entity instanceof VerbalActor) {
       console.info(`Talking to ${entity.name}`);
       conley.emit(PlayerEvents.StartInteraction, new InteractionStartEvent(this, entity));
     }

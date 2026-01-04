@@ -1,6 +1,7 @@
-import { Actor, Circle, Color, Rectangle, TileMap, Vector } from "excalibur";
+import { Circle, Color, Rectangle, TileMap, Vector } from "excalibur";
 import { BaseLevel } from "./baselevel";
 import { config } from "../Configuration/throne-config";
+import { VerbalActor } from "../Actors/verbal-actor";
 
 export class ThroneRoom extends BaseLevel {
   tileMap!: TileMap;
@@ -43,7 +44,8 @@ export class ThroneRoom extends BaseLevel {
 
   buildNpcs() {
     config.npcs.forEach((npc) => {
-      const actor = new Actor({
+      const actor = new VerbalActor({
+        dialog: npc.dialog,
         x: npc.x,
         y: npc.y,
         width: 16,

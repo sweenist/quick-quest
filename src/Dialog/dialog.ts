@@ -16,13 +16,8 @@ import { conley, DialogEvents } from "../Events/eventTypes";
 import { Resources } from "../resources";
 import { DialogPortrait } from "./dialog-portrait";
 import { DialogText, DialogTextConfig } from "./dialog-text";
+import { DialogPlacement } from "../types";
 
-/*
-top: y = 0
-middle: y = screen.height /2 - dialog.height /2
-bottom: y = screen.height - dialogHeight
-*/
-export type DialogPlacement = "bottom" | "top" | "center";
 const destinationConfig = {
   drawCenter: true,
   horizontalStretch: NineSliceStretch.TileFit,
@@ -103,20 +98,25 @@ export class Dialog extends ScreenElement {
 
   onInitialize(engine: Engine): void {
     conley.on(DialogEvents.ShowDialog, (ev) => {
-
-      const portraitSize = 64;
-      const portraitOffset = portraitSize / 2;
       this.frameState = "start_growing";
       this.pos = this.getDialogPosition(engine.screen);
-      console.info(this.pos)
-      this.portrait = new DialogPortrait({
-        portraitGraphic: new Rectangle({
-          width: portraitSize,
-          height: portraitSize,
-          color: ev.other?.graphics.color,
-        }),
-        position: vec(portraitOffset, this.placement === 'bottom' ? -this.maxFrameHeight + portraitOffset : portraitOffset),
-      });
+
+      const dialogConfig = ev.other?.dialog;
+      if (dialogConfig && dialogConfig[0].portraitConfig) {
+        const portraitSize = 64;
+        const portraitOffset = portraitSize / 2;
+        this.portrait = new DialogPortrait({
+          portraitGraphic: new Rectangle({
+            width: portraitSize,
+            height: portraitSize,
+            color: ev.other?.graphics.color,
+          }),
+          position: vec(portraitOffset, this.placement === 'bottom' ? -this.maxFrameHeight + portraitOffset : portraitOffset),
+        });
+
+        this.addChild(this.portrait);
+      }
+      const message = dialogConfig && dialogConfig[0] ? dialogConfig[0].message : 'PLACEHOLDER';
       const textPosX = this.portrait ? this.portrait.width + this.margin * 2 : this.margin;
       const textAreaWidth = this.frame.width - textPosX - (this.margin * 4);
       const textPosition = vec(textPosX, this.placement === 'bottom' ? -this.maxFrameHeight : 0);
@@ -124,11 +124,10 @@ export class Dialog extends ScreenElement {
         pos: textPosition,
         height: this.maxFrameHeight,
         width: textAreaWidth,
-        message: "This is some sample text. You are in the throne room\n        \nLine break",
+        message,
         ...this._config,
       });
 
-      this.addChild(this.portrait);
       this.addChild(this.text);
     });
   }
@@ -140,8 +139,7 @@ export class Dialog extends ScreenElement {
       if (this.text?.isDone) {
         this.frameState = "shrinking";
         this.text.close();
-        this.removeChild(this.portrait!);
-        this.removeChild(this.text);
+        this.removeAllChildren();
         conley.emit(DialogEvents.CloseDialog);
       } else {
         this.text?.finish();
@@ -174,11 +172,7 @@ export class Dialog extends ScreenElement {
         break;
       }
       case "shrinking": {
-        this.frame.setTargetHeight(
-          this.frame.height - this.transitionOutSpeed,
-          true
-        );
-        // this.pos.y += this.transitionOutSpeed;
+        this.frame.setTargetHeight(this.frame.height - this.transitionOutSpeed, true);
         if (this.frame.height === 24) {
           this.frameState = "closed";
           this.frame.setTargetHeight(24);
@@ -204,8 +198,6 @@ export class Dialog extends ScreenElement {
         return vec(this.margin, screen.canvasHeight / screen.pixelRatio);
       case 'top':
         return vec(this.margin, 0);
-      case 'center':
-        return vec(this.margin, screen.halfCanvasHeight / screen.pixelRatio);
     }
   }
 }
