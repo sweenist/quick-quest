@@ -16,23 +16,19 @@ export class AdvanceMarker extends ScreenElement {
 
   onInitialize(engine: Engine): void {
     conley.on(TypeWriterEvents.TypingComplete, (ev) => {
-      console.info('show animation', ev.endingText)
       this.graphics.use(this.animation);
     });
 
     conley.on(TypeWriterEvents.TypingForceComplete, () => {
-      console.info('show animation force')
       this.graphics.use(this.animation);
     });
 
     conley.on(DialogEvents.CloseDialog, () => {
       this.graphics.hide();
-      console.info('hide animation')
     });
 
     conley.on(TypeWriterEvents.DialogAdvancing, () => {
       this.graphics.hide();
-      console.info('hide animation')
     });
   }
 }

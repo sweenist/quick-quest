@@ -18,6 +18,7 @@ import { DialogText } from "./dialog-text";
 import { DialogPlacement } from "../types";
 import { AdvanceMarker } from "./advance-marker";
 import { TypingForceComplete } from "../Events/events";
+import { questState } from "../Game/quest-state";
 
 const destinationConfig = {
   drawCenter: true,
@@ -110,13 +111,13 @@ export class Dialog extends ScreenElement {
       this.frameState = "start_growing";
       this.pos = this.getDialogPosition(engine.screen);
 
-      const dialogConfig = ev.other?.dialog;
-      if (dialogConfig && dialogConfig[0].portraitConfig) {
-        const portraitConfig = dialogConfig[0].portraitConfig
+      const scenario = questState.getScenario(ev.other?.dialog!);
+      if (scenario && scenario.portraitConfig) {
+        const portraitConfig = scenario.portraitConfig
         const portraitSize = Math.max(portraitConfig.imageHeight ?? 0, portraitConfig.imageWidth);
         const portraitOffset = portraitSize / 2;
         this.portrait = new DialogPortrait({
-          ...dialogConfig[0].portraitConfig,
+          ...scenario.portraitConfig,
           pos: vec(portraitOffset, this.placement === 'bottom' ? -this.maxFrameHeight + portraitOffset : portraitOffset),
         });
         this.addChild(this.portrait);
@@ -125,7 +126,6 @@ export class Dialog extends ScreenElement {
         this.portrait = null;
       }
 
-      const message = dialogConfig && dialogConfig[0] ? dialogConfig[0].message : 'PLACEHOLDER';
       const textPosX = this.portrait ? this.portrait.normalizedWidth + this.margin * 2 : this.margin;
       const textAreaWidth = this.frame.width - textPosX - (this.margin * 4);
       const textPosition = vec(textPosX, this.placement === 'bottom' ? -this.maxFrameHeight : 0);
@@ -133,13 +133,15 @@ export class Dialog extends ScreenElement {
         pos: textPosition,
         height: this.maxFrameHeight,
         width: textAreaWidth,
-        message,
+        message: scenario?.message ?? '...',
         ...this._config,
       });
 
       this.addChild(this.text);
       this.addChild(this.advanceMarker);
-      console.info(this.text, this.advanceMarker);
+
+      if (scenario?.addFlag)
+        questState.add(scenario.addFlag)
     });
   }
 

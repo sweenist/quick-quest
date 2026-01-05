@@ -101,7 +101,6 @@ export class TypeWriter extends Graphic {
         this.isDone = true;
         this.stringIndex = this.endStringText.length;
         this.currentStringText = this.endStringText;
-        console.warn('fire from stringIndex > endSTring text')
         conley.emit(TypeWriterEvents.TypingComplete, this.currentStringText);
       } else {
         this.currentStringText = this.endStringText.slice(0, this.stringIndex);
