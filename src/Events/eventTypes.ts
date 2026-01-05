@@ -1,7 +1,7 @@
 import { EventEmitter } from "excalibur"
-import { CloseDialogEvent, InteractionCompleteEvent, InteractionStartEvent, ShowDialogEvent } from "./events"
+import { CloseDialogEvent, InteractionCompleteEvent, InteractionStartEvent, LetterTyped, ShowDialogEvent, TypingComplete, TypingStart } from "./events"
 
-type PlayerEvents = {
+interface PlayerEvents {
   startInteraction: InteractionStartEvent
   completeInteraction: InteractionCompleteEvent
 }
@@ -11,7 +11,7 @@ export const PlayerEvents = {
   CompleteInteraction: 'completeInteraction'
 } as const
 
-export type DialogEvents = {
+interface DialogEvents {
   showDialog: ShowDialogEvent;
   closeDialog: CloseDialogEvent;
 }
@@ -21,6 +21,18 @@ export const DialogEvents = {
   CloseDialog: 'closeDialog'
 } as const;
 
-export type QuickQuestEvents = PlayerEvents & DialogEvents;
+interface TypeWriterEvents {
+  typingComplete: TypingComplete;
+  typingStart: TypingStart;
+  letterTyped: LetterTyped;
+}
+
+export const TypeWriterEvents = {
+  TypingComplete: 'typingComplete',
+  TypingStart: 'typingStart',
+  LetterTyped: 'letterTyped',
+}
+
+export type QuickQuestEvents = PlayerEvents & DialogEvents & TypeWriterEvents;
 
 export const conley = new EventEmitter<QuickQuestEvents>();
