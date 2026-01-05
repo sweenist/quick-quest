@@ -11,11 +11,13 @@ import {
   vec,
   Vector,
 } from "excalibur";
-import { conley, DialogEvents } from "../Events/eventTypes";
+import { conley, DialogEvents, TypeWriterEvents } from "../Events/eventTypes";
 import { Resources } from "../resources";
 import { DialogPortrait } from "./dialog-portrait";
-import { DialogText, DialogTextConfig } from "./dialog-text";
+import { DialogText } from "./dialog-text";
 import { DialogPlacement } from "../types";
+import { AdvanceMarker } from "./advance-marker";
+import { TypingForceComplete } from "../Events/events";
 
 const destinationConfig = {
   drawCenter: true,
@@ -63,8 +65,9 @@ export class Dialog extends ScreenElement {
   transitionInSpeed: number;
   transitionOutSpeed: number;
   margin: number;
+  advanceMarker: ScreenElement;
 
-  constructor(config: DialogConfig & DialogTextConfig & ActorArgs) {
+  constructor(config: DialogConfig & ActorArgs) {
     const dialogWidth = Dialog.getDialogWidth(config.screen, config.margin ?? 0)
     super({ ...config, });
     this._config = config;
@@ -93,6 +96,13 @@ export class Dialog extends ScreenElement {
       destinationConfig,
     };
     this.frame = new NineSlice(this.frameConfig);
+
+    this.advanceMarker = new AdvanceMarker({
+      x: dialogWidth - (this.margin * 2 + (config.frameRightMargin ?? 8)),
+      y: this.placement === 'bottom'
+        ? -24
+        : this.maxFrameHeight - 24
+    });
   }
 
   onInitialize(engine: Engine): void {
@@ -128,6 +138,8 @@ export class Dialog extends ScreenElement {
       });
 
       this.addChild(this.text);
+      this.addChild(this.advanceMarker);
+      console.info(this.text, this.advanceMarker);
     });
   }
 
@@ -139,11 +151,10 @@ export class Dialog extends ScreenElement {
         this.frameState = "shrinking";
         this.text.close();
         this.removeAllChildren();
-        console.info('closing dialog');
         conley.emit(DialogEvents.CloseDialog);
       } else {
-        console.info('fill text');
         this.text?.finish();
+        conley.emit(TypeWriterEvents.TypingForceComplete, new TypingForceComplete());
       }
     }
 

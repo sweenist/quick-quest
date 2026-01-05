@@ -1,5 +1,7 @@
 import { ScreenElement, Color, ActorArgs, Engine, Keys } from 'excalibur';
 import { TypeWriter, TypeWriterConfig } from "./typewriter";
+import { conley, TypeWriterEvents } from '../Events/eventTypes';
+import { DialogAdvanced, DialogAdvancing } from '../Events/events';
 
 export interface DialogTextConfig {
   textSpeed?: number;
@@ -22,7 +24,7 @@ export class DialogText extends ScreenElement {
     this.textSpeed = config.textSpeed ?? 25;
     this.textSize = config.textSize ?? 16;
     this.textLineHeight = config.textLineHeight ?? 24;
-    this._messages = Array.isArray(config.message) ? config.message : [config.message];
+    this._messages = Array.isArray(config.message) ? config.message : [config.message!];
 
     const typeWriterConfig = this.buildTypeWriterConfig(this._messages[this._currentIndex]!);
     this.text = new TypeWriter(typeWriterConfig);
@@ -32,7 +34,7 @@ export class DialogText extends ScreenElement {
     return this.text.isDone && this._currentIndex + 1 === this._messages.length;
   }
 
-  get pharseComplete() {
+  get phraseComplete() {
     return this.text.isDone;
   }
 
@@ -41,18 +43,16 @@ export class DialogText extends ScreenElement {
     const actionPressed = input.keyboard.wasPressed(Keys.Space);
     if (this.text.isDone && actionPressed && (this._currentIndex + 1) < this._messages.length) {
       this.scrollToNextMessage = true;
-      console.info('definitely scrolling', this._messages)
+      conley.emit(TypeWriterEvents.DialogAdvancing, new DialogAdvancing());
     }
     if (this.scrollToNextMessage) {
-      console.info('scrollToNext message is true')
       if (this.text.scrollable) {
         this.text.cnvTextConfig.y -= 2;
       }
       else {
         this.scrollToNextMessage = false;
-        this.text.reset();
         this._currentIndex++;
-        this.text.setNextText(this._messages[this._currentIndex]);
+        conley.emit(TypeWriterEvents.DialogAdvanced, new DialogAdvanced(this._messages[this._currentIndex]));
       }
     }
   }

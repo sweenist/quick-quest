@@ -39,6 +39,13 @@ export class TypingComplete extends GameEvent<TypeWriter> {
   }
 }
 
+export class TypingForceComplete extends GameEvent<TypeWriter> {
+  constructor() {
+    super();
+  }
+}
+
+
 export class TypingStart extends GameEvent<TypeWriter> {
   constructor() {
     super();
@@ -50,5 +57,19 @@ export class LetterTyped extends GameEvent<TypeWriter> {
   constructor(letter: string) {
     super();
     this.letter = letter;
+  }
+}
+
+export class DialogAdvancing extends GameEvent<TypeWriter> {
+  constructor() {
+    super();
+  }
+}
+
+export class DialogAdvanced extends GameEvent<TypeWriter> {
+  message: string;
+  constructor(message: string) {
+    super();
+    this.message = message;
   }
 }

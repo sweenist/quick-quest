@@ -1,5 +1,6 @@
-import { Color, EventEmitter, ExcaliburGraphicsContext, GameEvent, Graphic } from "excalibur";
+import { Color, ExcaliburGraphicsContext, Graphic } from "excalibur";
 import { drawText, CanvasTextConfig } from "canvas-txt";
+import { conley, TypeWriterEvents } from "../Events/eventTypes";
 export type { CanvasTextConfig } from "canvas-txt";
 
 export interface TypeWriterConfig {
@@ -9,41 +10,12 @@ export interface TypeWriterConfig {
   color?: Color;
 }
 
-interface TypeWriterEvents {
-  typingComplete: TypingComplete;
-  typingStart: TypingStart;
-  letterTyped: LetterTyped;
-}
-
-export class TypingComplete extends GameEvent<TypeWriter> {
-  endingText: string;
-  constructor(endingText: string) {
-    super();
-    this.endingText = endingText;
-  }
-}
-
-export class TypingStart extends GameEvent<TypeWriter> {
-  constructor() {
-    super();
-  }
-}
-
-export class LetterTyped extends GameEvent<TypeWriter> {
-  letter: string;
-  constructor(letter: string) {
-    super();
-    this.letter = letter;
-  }
-}
-
 export class TypeWriter extends Graphic {
   endStringText: string;
   currentStringText: string;
   stringIndex: number = 0;
   typeDelay: number;
   config: TypeWriterConfig;
-  public events: EventEmitter<TypeWriterEvents> = new EventEmitter<TypeWriterEvents>();
   lastTimestamp = 0;
   cnv: HTMLCanvasElement;
   ctx: CanvasRenderingContext2D | null;
@@ -75,6 +47,11 @@ export class TypeWriter extends Graphic {
     this.ctx = this.cnv.getContext("2d");
     this.ctx!.fillStyle = this.color.toString();
     this.ctx!.strokeStyle = this.color.toString();
+
+    conley.on(TypeWriterEvents.DialogAdvanced, (ev) => {
+      this.reset();
+      this.setNextText(ev.message);
+    });
   }
 
   clone(): Graphic {
@@ -108,7 +85,7 @@ export class TypeWriter extends Graphic {
 
   protected _drawImage(ex: ExcaliburGraphicsContext, x: number, y: number): void {
     if (this.lastTimestamp === 0) {
-      this.events.emit("typingStart", this);
+      conley.emit(TypeWriterEvents.TypingStart, this);
     }
     let now = Date.now();
     let elapsed = now - this.lastTimestamp;
@@ -124,10 +101,11 @@ export class TypeWriter extends Graphic {
         this.isDone = true;
         this.stringIndex = this.endStringText.length;
         this.currentStringText = this.endStringText;
-        this.events.emit("typingComplete", this.currentStringText);
+        console.warn('fire from stringIndex > endSTring text')
+        conley.emit(TypeWriterEvents.TypingComplete, this.currentStringText);
       } else {
         this.currentStringText = this.endStringText.slice(0, this.stringIndex);
-        this.events.emit("letterTyped", this.currentStringText.at(-1));
+        conley.emit(TypeWriterEvents.LetterTyped, this.currentStringText.at(-1));
       }
     }
 
