@@ -1,6 +1,7 @@
 import { Color, vec } from "excalibur";
 import { storyFlags } from "./story-flags";
 import { SpriteSheets } from "./sprite-sheets";
+import { DialogScenario } from "../Actors/verbal-actor";
 
 export const config = {
   room: [
@@ -46,7 +47,7 @@ export const config = {
             scale: vec(2, 2),
           }
         }
-      ]
+      ] as DialogScenario[]
     },
     {
       x: 80, y: 48, color: Color.Rose, name: 'Queen',
@@ -73,7 +74,7 @@ export const config = {
             scale: vec(2, 2),
           }
         },
-      ]
+      ] as DialogScenario[]
     }
   ]
 }
