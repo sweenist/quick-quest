@@ -1,6 +1,9 @@
-import { Actor, ActorArgs, Graphic, SpriteSheet, Vector } from "excalibur"
+import { Actor, ActorArgs, SpriteSheet, Vector } from "excalibur"
 import { DialogPlacement } from "../types";
 
+export interface IDialogable {
+  dialog: DialogScenario[]
+}
 
 export type DialogScenario = {
   message: string | string[];
@@ -21,10 +24,9 @@ export type PortraitConfig = {
 
 interface VerbalActorArgs {
   dialog: DialogScenario[],
-  portrait?: Graphic
 }
 
-export class VerbalActor extends Actor {
+export class VerbalActor extends Actor implements IDialogable {
   dialog: DialogScenario[];
 
   constructor(config: VerbalActorArgs & ActorArgs) {

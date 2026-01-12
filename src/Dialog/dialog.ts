@@ -17,13 +17,18 @@ import { DialogPortrait } from "./dialog-portrait";
 import { DialogText } from "./dialog-text";
 import { DialogPlacement } from "../types";
 import { AdvanceMarker } from "./advance-marker";
-import { TypingForceComplete } from "../Events/events";
+import { ShowDialogEvent, TypingForceComplete } from "../Events/events";
 import { questState } from "../Game/quest-state";
 
 const destinationConfig = {
   drawCenter: true,
   horizontalStretch: NineSliceStretch.TileFit,
   verticalStretch: NineSliceStretch.TileFit,
+};
+
+const dialogAnchors: Record<DialogPlacement, Vector> = {
+  'bottom': vec(0, 1),
+  'top': Vector.Zero,
 };
 
 interface DialogConfig {
@@ -46,15 +51,29 @@ interface DialogConfig {
   margin?: number;
 }
 
+const defaults: Partial<DialogConfig> = {
+  margin: 0,
+  placement: 'bottom',
+  portraitMargin: 8,
+  transitionInSpeed: 12,
+  frameBottomMargin: 8,
+  frameTopMargin: 8,
+  frameLeftMargin: 8,
+  frameRightMargin: 8,
+  frameSource: Resources.DialogFrame,
+  frameSourceHeight: 24,
+  frameSourceWidth: 24,
+}
+
 export class Dialog extends ScreenElement {
   private _config: DialogConfig;
+  private _showDialog?: (ev: ShowDialogEvent) => void;
   placement: DialogPlacement;
   frame: NineSlice;
   frameState:
     | "closed"
     | "start_growing"
     | "growing"
-    | "done_opening"
     | "open"
     | "shrinking" = "closed";
   frameConfig: NineSliceConfig;
@@ -68,38 +87,43 @@ export class Dialog extends ScreenElement {
   margin: number;
   advanceMarker: ScreenElement;
 
+
+
   constructor(config: DialogConfig & ActorArgs) {
     const dialogWidth = Dialog.getDialogWidth(config.screen, config.margin ?? 0)
-    super({ ...config, });
-    this._config = config;
-    this.margin = config.margin ?? 0;
-    this.maxFrameHeight = config.maxFrameHeight;
-    this.placement = config.placement ?? "bottom";
-    this.portraitMargin = config.portraitMargin ?? 8;
-    this.transitionInSpeed = config.transitionInSpeed ?? 12;
-    this.transitionOutSpeed =
-      config.transitionOutSpeed ?? this.transitionInSpeed;
 
-    this.anchor = this.placement === 'bottom' ? vec(0, 1) : this.anchor;
+    super({ ...config, });
+
+    this._config = config;
+    const cfg = { ...defaults, ...config }
+    this.margin = cfg.margin!;
+    this.maxFrameHeight = cfg.maxFrameHeight;
+    this.placement = cfg.placement!;
+    this.portraitMargin = cfg.portraitMargin!;
+    this.transitionInSpeed = cfg.transitionInSpeed!;
+    this.transitionOutSpeed =
+      cfg.transitionOutSpeed ?? this.transitionInSpeed;
+
+    this.anchor = dialogAnchors[this.placement];
 
     this.frameConfig = {
-      source: config.frameSource ?? Resources.DialogFrame,
-      height: 24,
+      source: cfg.frameSource!,
+      height: cfg.frameSource!.height,
       width: dialogWidth,
       sourceConfig: {
-        bottomMargin: config.frameBottomMargin ?? 8,
-        topMargin: config.frameTopMargin ?? 8,
-        leftMargin: config.frameLeftMargin ?? 8,
-        rightMargin: config.frameRightMargin ?? 8,
-        height: config.frameSourceHeight ?? 24,
-        width: config.frameSourceWidth ?? 24,
+        bottomMargin: cfg.frameBottomMargin!,
+        topMargin: cfg.frameTopMargin!,
+        leftMargin: cfg.frameLeftMargin!,
+        rightMargin: cfg.frameRightMargin!,
+        height: cfg.frameSourceHeight!,
+        width: cfg.frameSourceWidth!,
       },
       destinationConfig,
     };
     this.frame = new NineSlice(this.frameConfig);
 
     this.advanceMarker = new AdvanceMarker({
-      x: dialogWidth - (this.margin * 2 + (config.frameRightMargin ?? 8)),
+      x: dialogWidth - (this.margin * 2 + (cfg.frameRightMargin!)),
       y: this.placement === 'bottom'
         ? -24
         : this.maxFrameHeight - 24
@@ -107,7 +131,7 @@ export class Dialog extends ScreenElement {
   }
 
   onInitialize(engine: Engine): void {
-    conley.on(DialogEvents.ShowDialog, (ev) => {
+    this._showDialog = (ev) => {
       this.frameState = "start_growing";
       this.pos = this.getDialogPosition(engine.screen);
 
@@ -142,8 +166,15 @@ export class Dialog extends ScreenElement {
 
       if (scenario?.addFlag)
         questState.add(scenario.addFlag)
-    });
+    };
+
+    conley.on(DialogEvents.ShowDialog, this._showDialog);
   }
+
+  onRemove(engine: Engine): void {
+    conley.off(DialogEvents.ShowDialog, this._showDialog!);
+  }
+
 
   update(engine: Engine, elapsed: number): void {
     const { input } = engine;
@@ -172,17 +203,13 @@ export class Dialog extends ScreenElement {
           true
         );
         if (this.frame.height >= this.maxFrameHeight) {
-          this.frameState = "done_opening";
           this.frame.setTargetHeight(this.maxFrameHeight, true);
+          this.frameState = "open";
+          this.portrait?.show();
+          this.text?.show();
         }
         this.frame = this.frame.clone();
         this.graphics.use(this.frame);
-        break;
-      }
-      case "done_opening": {
-        this.frameState = "open";
-        this.portrait?.show();
-        this.text?.show();
         break;
       }
       case "shrinking": {
@@ -201,17 +228,23 @@ export class Dialog extends ScreenElement {
   }
 
   private static getDialogWidth(screen: Screen, margin: number) {
-    const pixelRatio = screen?.pixelRatio === 0 ? 1 : screen.pixelRatio;
-    const baseWidth = screen?.canvasWidth / pixelRatio
+
+    const baseWidth = screen?.canvasWidth / Dialog.getPixelRatio(screen);
     return baseWidth - (margin * 2);
   }
 
   private getDialogPosition(screen: Screen): Vector {
     switch (this.placement) {
       case 'bottom':
-        return vec(this.margin, screen.canvasHeight / screen.pixelRatio);
+        return vec(this.margin, screen.canvasHeight / Dialog.getPixelRatio(screen));
       case 'top':
         return vec(this.margin, 0);
     }
+  }
+
+  private static getPixelRatio(screen?: Screen) {
+    return screen?.pixelRatio && screen.pixelRatio > 0
+      ? screen.pixelRatio
+      : 1;
   }
 }
