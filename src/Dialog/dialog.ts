@@ -72,7 +72,7 @@ export class Dialog extends ScreenElement {
   frame: NineSlice;
   frameState:
     | "closed"
-    | "start_growing"
+    | "initialize"
     | "growing"
     | "open"
     | "shrinking" = "closed";
@@ -132,7 +132,7 @@ export class Dialog extends ScreenElement {
 
   onInitialize(engine: Engine): void {
     this._showDialog = (ev) => {
-      this.frameState = "start_growing";
+      this.frameState = "initialize";
       this.pos = this.getDialogPosition(engine.screen);
 
       const scenario = questState.getScenario(ev.other?.dialog!);
@@ -192,7 +192,7 @@ export class Dialog extends ScreenElement {
     }
 
     switch (this.frameState) {
-      case "start_growing": {
+      case "initialize": {
         this.frameState = "growing";
         this.graphics.use(this.frame);
         break;
