@@ -25,6 +25,12 @@ export class ShowDialogEvent extends GameEvent<Actor, VerbalActor> {
   }
 }
 
+export class UserAdvanceEvent extends GameEvent<Actor> {
+  constructor(self: Actor) {
+    super();
+  }
+}
+
 export class CloseDialogEvent extends GameEvent<Actor> {
   constructor(self: Actor) {
     super();

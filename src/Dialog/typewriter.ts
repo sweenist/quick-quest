@@ -75,6 +75,10 @@ export class TypeWriter extends Graphic {
     return Math.abs(this.cnvTextConfig.y) < this.contentHeight;
   }
 
+  finishScroll() {
+    this.cnvTextConfig.y = -this.contentHeight;
+  }
+
   setNextText(message: string) {
     this.endStringText = message;
   }

@@ -186,7 +186,7 @@ export class Dialog extends ScreenElement {
         this.removeAllChildren();
         conley.emit(DialogEvents.CloseDialog);
       } else {
-        this.text?.finish();
+        conley.emit(DialogEvents.UserAdvance);
         conley.emit(TypeWriterEvents.TypingForceComplete, new TypingForceComplete());
       }
     }

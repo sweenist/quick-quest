@@ -1,6 +1,6 @@
-import { ScreenElement, Color, ActorArgs, Engine, Keys } from 'excalibur';
+import { ScreenElement, Color, ActorArgs, Engine } from 'excalibur';
 import { TypeWriter, TypeWriterConfig } from "./typewriter";
-import { conley, TypeWriterEvents } from '../Events/eventTypes';
+import { conley, DialogEvents, TypeWriterEvents } from '../Events/eventTypes';
 import { DialogAdvanced, DialogAdvancing } from '../Events/events';
 
 export interface DialogTextConfig {
@@ -38,13 +38,26 @@ export class DialogText extends ScreenElement {
     return this.text.isDone;
   }
 
+  get hasMoreText(): boolean {
+    return (this._currentIndex + 1) < this._messages.length;
+  }
+
+  onInitialize(engine: Engine): void {
+    conley.on(DialogEvents.UserAdvance, () => {
+      if (!this.text.isDone) {
+        this.finish();
+      }
+      else if (this.scrollToNextMessage) {
+        this.text.finishScroll();
+      }
+      else if (this.text.isDone && this.hasMoreText) {
+        this.scrollToNextMessage = true;
+        conley.emit(TypeWriterEvents.DialogAdvancing, new DialogAdvancing());
+      }
+    });
+  }
+
   onPreUpdate(engine: Engine, elapsed: number): void {
-    const { input } = engine;
-    const actionPressed = input.keyboard.wasPressed(Keys.Space);
-    if (this.text.isDone && actionPressed && (this._currentIndex + 1) < this._messages.length) {
-      this.scrollToNextMessage = true;
-      conley.emit(TypeWriterEvents.DialogAdvancing, new DialogAdvancing());
-    }
     if (this.scrollToNextMessage) {
       if (this.text.scrollable) {
         this.text.cnvTextConfig.y -= 2;

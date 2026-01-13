@@ -1,5 +1,5 @@
 import { EventEmitter } from "excalibur"
-import { DialogAdvanced, CloseDialogEvent, InteractionCompleteEvent, InteractionStartEvent, LetterTyped, ShowDialogEvent, TypingComplete, TypingStart, DialogAdvancing, TypingForceComplete } from "./events"
+import { DialogAdvanced, CloseDialogEvent, InteractionCompleteEvent, InteractionStartEvent, LetterTyped, ShowDialogEvent, TypingComplete, TypingStart, DialogAdvancing, TypingForceComplete, UserAdvanceEvent } from "./events"
 
 interface PlayerEvents {
   startInteraction: InteractionStartEvent
@@ -13,11 +13,13 @@ export const PlayerEvents = {
 
 interface DialogEvents {
   showDialog: ShowDialogEvent;
+  userAdvance: UserAdvanceEvent;
   closeDialog: CloseDialogEvent;
 }
 
 export const DialogEvents = {
   ShowDialog: 'showDialog',
+  UserAdvance: 'userAdvance',
   CloseDialog: 'closeDialog'
 } as const;
 

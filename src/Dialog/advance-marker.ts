@@ -31,4 +31,14 @@ export class AdvanceMarker extends ScreenElement {
       this.graphics.hide();
     });
   }
+
+  onRemove(engine: Engine): void {
+    conley.off(TypeWriterEvents.TypingComplete);
+
+    conley.off(TypeWriterEvents.TypingForceComplete);
+
+    conley.off(DialogEvents.CloseDialog);
+
+    conley.off(TypeWriterEvents.DialogAdvancing);
+  }
 }
